@@ -1,0 +1,3276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dispatch FMS</title>
+<style>
+html,body,div,span,table,thead,tbody,tr,th,td,input,select,button,label{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;background:#F3F2EF;color:#1A1A1A;min-height:100vh}
+.top{position:fixed;top:0;left:0;right:0;height:48px;background:#1A1A1A;display:flex;align-items:center;padding:0 16px;z-index:600}
+.logo{font-size:14px;font-weight:800;color:#fff;white-space:nowrap;margin-right:20px;flex-shrink:0;letter-spacing:-.3px}
+.logo b{color:#F5C800}
+.tabs{display:flex;height:48px;flex:1;gap:3px;align-items:flex-end}
+.tab{height:38px;padding:0 16px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:#9a9a9a;border-radius:9px 9px 0 0;display:flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap;flex-shrink:0;position:relative;transition:all .15s}
+.tab:hover{color:#fff;background:rgba(255,255,255,.07)}
+.tab.on{color:#fff;background:rgba(245,200,0,.12)}
+.tab.on::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:3px;background:#F5C800;border-radius:3px 3px 0 0}
+.tnum{width:22px;height:22px;border-radius:50%;background:#333;color:#bbb;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #454545;transition:all .15s}
+.tab.on .tnum{background:#F5C800;color:#1A1A1A;border-color:#F5C800}
+.badge{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#333;color:#bbb;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #454545;transition:all .15s}
+.tab:hover .badge{border-color:#666;color:#fff}
+.tab.on .badge{background:rgba(255,255,255,.15);color:#fff;border-color:#666}
+.ubox{margin-left:auto;display:flex;align-items:center;gap:9px;flex-shrink:0;padding:4px 8px 4px 14px;border-left:1px solid #2a2a2a;border-radius:8px;cursor:pointer;transition:background .12s}
+.ubox:hover{background:#2a2a2a}.ubox:hover .uem{color:#F5C800}
+.uav{width:30px;height:30px;border-radius:50%;background:#F5C800;color:#1A1A1A;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.uinfo{text-align:right}
+.uem{font-size:11px;color:#e0e0e0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uts{font-size:9px;color:#808080;margin-top:1px}
+.page{display:none}.page.on{display:block}
+.wrap{display:flex;flex-direction:column;margin-top:104px;min-height:0}
+.cbar{flex-shrink:0;background:#fff;border-bottom:2px solid #e8e6e1;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;height:48px;scrollbar-width:none}
+.cbar::-webkit-scrollbar{display:none}
+.csep{width:1px;height:22px;background:#e8e6e1;flex-shrink:0;margin:0 3px}
+.clbl{flex-shrink:0;font-size:10px;font-weight:700;color:#A0A0A0;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0}
+.cinp{height:30px;padding:0 9px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:11px;color:#1A1A1A;background:#fff;outline:none;flex-shrink:0;transition:border .15s}
+.cinp:focus{border-color:#F5C800}
+.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;flex-shrink:0;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid transparent;white-space:nowrap;flex-shrink:0}
+.pill b{font-size:13px;font-weight:800}
+.p-tot{background:#fffbeb;border-color:#F5C800;color:#1A1A1A}.p-gray{background:#f5f4f0;border-color:#ddd;color:#808080}
+.p-red{background:#fff5f5;border-color:#fecaca;color:#dc2626}.p-green{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.unsaved{font-size:15px;line-height:1;color:#d97706;font-weight:700;display:none;white-space:nowrap}
+.so-wrap{position:relative;flex-shrink:0}
+.so-btn{height:30px;padding:0 9px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:11px;color:#1A1A1A;background:#fff;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;min-width:112px;font-weight:500;transition:border .15s}
+.so-btn:hover{border-color:#F5C800}.so-btn.act{border-color:#F5C800;background:#fffbeb;font-weight:600}
+.so-drop{display:none;position:fixed;z-index:900;background:#fff;border:1.5px solid #ddd;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.13);min-width:290px;max-width:400px;padding:8px 0}
+.so-drop.open{display:block}
+.so-srch{width:calc(100% - 14px);margin:0 7px 6px;height:28px;padding:0 9px;border:1.5px solid #ddd;border-radius:5px;font-family:inherit;font-size:11px;outline:none}
+.so-srch:focus{border-color:#F5C800}
+.so-selall{padding:6px 12px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0eeeb}
+.so-selall:hover{background:#fffbeb}.so-selall input{accent-color:#F5C800;width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.so-list{max-height:220px;overflow-y:auto}
+.so-row{padding:5px 12px;display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer}
+.so-row:hover{background:#fffbeb}.so-row input{accent-color:#F5C800;width:13px;height:13px;flex-shrink:0;cursor:pointer}
+.so-row-cnt{color:#A0A0A0;font-size:10px;margin-left:auto;flex-shrink:0}
+.so-foot{border-top:1.5px solid #e8e6e1;padding:6px 10px;display:flex;gap:6px;margin-top:4px}
+.btn{height:30px;padding:0 12px;border-radius:6px;border:1.5px solid #ddd;background:#fff;color:#1A1A1A;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:all .12s;flex-shrink:0}
+.btn:hover{background:#f5f4f0;border-color:#bbb}.btn:active{opacity:.85}
+.btn.primary{background:#1A1A1A;border-color:#1A1A1A;color:#F5C800}.btn.primary:hover{background:#333}
+.btn.yellow{background:#F5C800;border-color:#F5C800;color:#1A1A1A;font-weight:700}.btn.yellow:hover{background:#e6ba00}
+.btn.green{background:#16a34a;border-color:#16a34a;color:#fff}.btn.green:hover{background:#15803d}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.kbd{font-size:9px;color:#A0A0A0;white-space:nowrap;flex-shrink:0}
+kbd{background:#f0eeeb;border:1px solid #ddd;border-radius:3px;padding:1px 4px;font-size:9px;font-family:inherit;color:#808080}
+.content{padding:10px 14px 14px;background:#F3F2EF}
+.tcard{background:#fff;border:1.5px solid #e8e6e1;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.tbl-wrap{overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 246px)}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{background:#1A1A1A;color:#A0A0A0;padding:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;vertical-align:middle;position:sticky;top:0;z-index:20}
+thead tr{height:40px}
+.th-inner{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;gap:5px;cursor:pointer;transition:background .12s;user-select:none}
+.th-inner:hover{background:#2a2a2a}.th-inner.nf{cursor:default}.th-inner.nf:hover{background:transparent}
+.th-txt{flex:1;white-space:normal;line-height:1.12}
+.th-flt{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#808080;border-radius:3px}
+.th-inner:hover .th-flt{color:#F5C800}
+th.filtered .th-flt{color:#F5C800;background:rgba(245,200,0,.25)}th.filtered{background:#1e1e0a}
+.cfd{display:none;position:fixed;z-index:999;background:#fff;border:1.5px solid #ddd;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.15);min-width:230px;max-width:300px;padding:8px 0}
+.cfd.open{display:block}
+.cfd-range{display:none;padding:4px 10px 8px;border-bottom:1px solid #f0eeeb;margin-bottom:4px}.cfd-range.on{display:block}
+.cfd-range-lbl{font-size:10px;font-weight:700;color:#A0A0A0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.cfd-range-row{display:flex;gap:6px;align-items:center}
+.cfd-range-row input{flex:1;min-width:0;height:28px;padding:0 8px;border:1.5px solid #ddd;border-radius:5px;font-family:inherit;font-size:11px;outline:none}
+.cfd-range-row input:focus{border-color:#F5C800}.cfd-range-row span{font-size:11px;color:#A0A0A0;flex-shrink:0}
+.cfd-srch{width:calc(100% - 14px);margin:0 7px 5px;height:27px;padding:0 8px;border:1.5px solid #ddd;border-radius:4px;font-family:inherit;font-size:11px;outline:none}
+.cfd-srch:focus{border-color:#F5C800}
+.cfd-list{max-height:200px;overflow-y:auto}
+.cfd-all{padding:5px 12px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;cursor:pointer;border-bottom:1px solid #f0eeeb;user-select:none}
+.cfd-all:hover{background:#fffbeb}.cfd-all input{accent-color:#F5C800;width:12px;height:12px;cursor:pointer;flex-shrink:0}
+.cfd-item{padding:5px 12px;display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;user-select:none}
+.cfd-item:hover{background:#fffbeb}.cfd-item input{accent-color:#F5C800;width:12px;height:12px;cursor:pointer;flex-shrink:0}
+.cfd-foot{border-top:1.5px solid #e8e6e1;padding:6px 10px;display:flex;gap:6px;margin-top:4px}
+tbody tr{border-bottom:1px solid #f0eeeb}tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fffef5}tbody tr.just-saved{background:#f0fdf4;transition:background 2s ease}
+tbody td{padding:8px 10px;vertical-align:top;font-size:12px;color:#1A1A1A;overflow:hidden;word-break:break-word}
+.km{font-weight:600;color:#1A1A1A;font-size:11px;display:block;word-break:break-word}
+.ks{font-size:10px;color:#A0A0A0;display:block;margin-top:1px}
+.dok{color:#16a34a;font-size:11px}.dovr{color:#dc2626;font-weight:600;font-size:11px}.dtdy{color:#d97706;font-size:11px}
+.otag{display:inline-block;font-size:9px;font-weight:700;background:#fee2e2;color:#dc2626;border-radius:3px;padding:1px 4px;margin-left:4px}
+.muted{font-size:12px;color:#cbb8a8}
+mark{background:#FFF3A3;color:#1A1A1A;border-radius:2px;padding:0 1px}
+.txt{height:26px;padding:0 7px;border:1.5px solid #ddd;border-radius:4px;font-family:inherit;font-size:11px;background:#fff;outline:none;width:100%;transition:border .15s}
+.txt:focus{border-color:#F5C800}.txt.hv{border-color:#16a34a;background:#f0fdf4;font-weight:600;color:#15803d}
+.txt.bad{border-color:#dc2626;background:#fff5f5;color:#dc2626;font-weight:600}
+.ckwrap{display:flex;align-items:center;justify-content:center}.ck-box{width:18px;height:18px;cursor:pointer;accent-color:#16a34a}
+.phw{display:flex;align-items:center;gap:6px;justify-content:center}
+.pgbar{padding:8px 12px;border-top:1.5px solid #e8e6e1;display:flex;align-items:center;gap:8px;background:#faf9f7;flex-shrink:0}
+.pg-info{font-size:11px;color:#808080;flex:1}.pg-info strong{color:#1A1A1A}
+.empty{padding:50px;text-align:center;color:#A0A0A0}.empty-ico{font-size:32px;margin-bottom:9px}.empty p{font-size:12px}
+#ov{position:fixed;inset:0;background:rgba(26,26,26,.82);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:9000}
+#ov.off{display:none}
+.spin{width:32px;height:32px;border:3px solid rgba(245,200,0,.2);border-top-color:#F5C800;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ov-t{font-size:13px;color:#e0e0e0;font-weight:600}.ov-err{font-size:12px;color:#f87171;max-width:440px;text-align:center;padding:0 16px;line-height:1.5}
+.toast{position:fixed;bottom:18px;right:18px;min-width:210px;max-width:380px;padding:10px 14px;border-radius:7px;font-size:12px;font-weight:500;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;animation:tup .2s ease}
+@keyframes tup{from{opacity:0;transform:translateY(7px)}}
+.toast.ok{background:#f0fdf4;border:1.5px solid #6ee7b7;color:#065f46}
+.toast.err{background:#fff5f5;border:1.5px solid #fca5a5;color:#991b1b}
+.toast.inf{background:#fffbeb;border:1.5px solid #F5C800;color:#1A1A1A}
+.cuk{width:18%}.cic{width:6%}.cnm{width:15%}.cqt{width:5%}.cmk{width:8%}
+.cpl{width:11%}.cdt{width:13%}.cdone{width:9%}
+.cpir{width:11%}.cpi{width:13%}.cmail{width:9%}.camt{width:12%}.cpiro{width:11%}.ccur{width:9%}
+
+   inherit the Dispatch table's proportions. 10 columns, sums to exactly 100%. */
+
+
+/* ── section strip (row 2): the steps inside the active section ── */
+.tico{font-size:13px;line-height:1;flex-shrink:0}
+.substrip{position:fixed;top:48px;left:0;right:0;height:56px;background:#fff;display:flex;align-items:center;padding:0 18px;gap:14px;z-index:590;border-bottom:1px solid #e8e6e1;box-shadow:0 2px 7px rgba(0,0,0,.045)}
+.sec-title{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#A0A0A0;white-space:nowrap;flex-shrink:0;padding-right:14px;border-right:1px solid #e8e6e1}
+.seg-wrap{display:inline-flex;background:#f1efe9;border-radius:12px;padding:4px;gap:3px;overflow-x:auto;scrollbar-width:none}
+.seg-wrap::-webkit-scrollbar{display:none}
+.seg{height:38px;padding:0 12px 0 7px;border:3px solid transparent;background:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;color:#857f74;display:flex;align-items:center;gap:9px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.seg:hover{color:#1A1A1A;background:rgba(0,0,0,.05)}
+.seg.on{background:#1A1A1A;color:#fff;border-color:#F5C800;box-shadow:0 3px 12px rgba(0,0,0,.28)}
+.scirc{width:24px;height:24px;border-radius:50%;background:#ddd8cf;color:#7a756c;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.seg:hover .scirc{background:#cdc7bb}
+.seg.on .scirc{background:#F5C800;color:#1A1A1A}
+.scount{font-size:10px;font-weight:800;background:rgba(0,0,0,.08);border-radius:9px;padding:1px 7px;min-width:18px;text-align:center}
+.seg.on .scount{background:rgba(255,255,255,.2)}
+.src-hint{margin-left:auto;font-size:10.5px;color:#A0A0A0;white-space:nowrap;flex-shrink:0}
+.src-hint b{color:#5a5a5a;font-weight:600}
+/* control bar is grouped: filters | stats | actions */
+.cgrp{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;flex-shrink:0}
+.cgrp.act{margin-left:0}
+
+
+
+/* ── Planned-date status filter (colour) ── */
+.cfd-status{display:none;padding:4px 0 6px;border-bottom:1px solid #f0eeeb;margin-bottom:4px}
+.cfd-status.on{display:block}
+.cfd-status .cfd-range-lbl{padding:0 12px 4px}
+.st-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block}
+.st-ovr{background:#dc2626}.st-tdy{background:#d97706}.st-fut{background:#16a34a}.st-non{background:#cbb8a8}
+
+/* ── dropdowns: bulk bar (.csel) and in-row (.idsel) ── */
+.csel{height:30px;padding:0 8px;border:1.5px solid #ddd;border-radius:6px;font-family:inherit;font-size:11px;
+  color:#1A1A1A;background:#fff;outline:none;flex-shrink:0;cursor:pointer;color-scheme:light}
+.csel:focus{border-color:#F5C800}
+.idsel{height:28px;padding:0 6px;border:1.5px solid #ddd;border-radius:5px;font-family:inherit;font-size:11.5px;
+  color:#1A1A1A;background:#fff;outline:none;width:100%;cursor:pointer;font-weight:600;color-scheme:light}
+.idsel:focus{border-color:#F5C800}
+.idsel.hv{border-color:#16a34a;background:#f0fdf4;color:#15803d}
+.idsel option,.csel option{color:#1A1A1A;background:#fff}
+
+
+.rowsave{height:30px;padding:0 13px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.ph-wait{font-size:10px;color:#bdb6aa;font-style:italic;white-space:nowrap}
+
+/* ── photo cell (STEP6 / STEP7 / STEP8) ── */
+.phwrap{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0}
+.hidef{display:none}
+.ph-pick{height:30px;padding:0 14px;border:1.5px solid #d9d6cf;border-radius:7px;background:#fff;
+  font-family:inherit;font-size:11.5px;font-weight:600;color:#1A1A1A;cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px;transition:all .12s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ph-pick:hover{border-color:#F5C800;background:#fffbeb}
+.ph-pick:active{transform:translateY(1px)}
+.ph-thumb{width:30px;height:30px;border-radius:6px;object-fit:cover;border:2px solid #F5C800;
+  cursor:pointer;flex-shrink:0;background:#f5f4f0;display:block}
+.ph-ok{font-size:10px;font-weight:700;color:#b45309;white-space:nowrap;flex-shrink:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis}
+
+/* Camera and Upload sit side by side — one tap each, no menu in between. */
+.ph-pick.cam{border-width:2.5px;border-color:#F5C800;background:#fffbeb;font-weight:700}
+.ph-pick.cam:hover{background:#F5C800}
+.phwrap{flex-wrap:wrap;row-gap:5px}
+
+/* Icon-only buttons shown next to an attached photo: retake, replace, remove. */
+.ph-mini{width:28px;height:28px;padding:0;border:1.5px solid #d9d6cf;border-radius:6px;background:#fff;
+  font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;transition:all .12s;
+  display:inline-flex;align-items:center;justify-content:center}
+.ph-mini:hover{border-color:#F5C800;background:#fffbeb}
+.ph-mini.del{border-color:#dc2626;color:#dc2626;background:#fff5f5}
+.ph-mini.del:hover{background:#dc2626;color:#fff}
+
+@media (max-width:860px){
+  /* Full-width, thumb-friendly on a phone */
+  .ph-pick{height:42px;font-size:13.5px;flex:1 1 100%;justify-content:center}
+  .ph-mini{width:36px;height:36px;font-size:15px}
+}
+
+
+/* ── Per-panel column widths ──────────────────────────────────────────────
+   Each set is scoped to its own panel and sums to exactly 100%. NOTE that
+   .cmk is used by BOTH Make and Model, so it counts twice in every sum.
+   Every panel now carries .ccur (the DB_format Location column).           */
+
+/* STEP2 — Plan the Dispatch: Is PI Required? -> (No) Plan Dispatch Date */
+#P_s2 .cuk{width:17%} #P_s2 .cic{width:6%}  #P_s2 .cnm{width:17%} #P_s2 .cqt{width:4%}
+#P_s2 .cmk{width:7%}  #P_s2 .ccur{width:8%} #P_s2 .cpl{width:10%}
+#P_s2 .cpir{width:11%} #P_s2 .cdt{width:13%}
+
+/* STEP3 — Create and Mail PI */
+#P_s3 .cuk{width:17%} #P_s3 .cic{width:6%}  #P_s3 .cnm{width:18%} #P_s3 .cqt{width:4%}
+#P_s3 .cmk{width:7%}  #P_s3 .ccur{width:8%} #P_s3 .cpl{width:10%}
+#P_s3 .cpi{width:14%} #P_s3 .cmail{width:9%}
+
+/* STEP4 — Payment received against PI */
+#P_s4 .cuk{width:17%} #P_s4 .cic{width:6%}  #P_s4 .cnm{width:17%} #P_s4 .cqt{width:4%}
+#P_s4 .cmk{width:6%}  #P_s4 .ccur{width:8%} #P_s4 .cpl{width:9%}
+#P_s4 .cpiro{width:13%} #P_s4 .camt{width:14%}
+#P_s4 .camt input{text-align:right;font-variant-numeric:tabular-nums}
+#P_s4 td.cpiro{font-weight:700;color:#1A1A1A}
+
+/* STEP5 — Required to move? -> (Yes) Move to Location | (No) Plan Dispatch Date */
+#P_s5 .cuk{width:14%} #P_s5 .cic{width:5%}  #P_s5 .cnm{width:14%} #P_s5 .cqt{width:4%}
+#P_s5 .cmk{width:5%}  #P_s5 .ccur{width:8%} #P_s5 .cpl{width:8%}
+#P_s5 .cmove{width:10%} #P_s5 .cloc{width:13%} #P_s5 .cdt{width:14%}
+
+/* STEP6 / STEP8 — the two photo-only loading steps */
+#P_s6 tbody td,#P_s7 tbody td,#P_s8 tbody td{padding:11px 10px;vertical-align:middle}
+#P_s6 .cuk{width:16%} #P_s6 .cic{width:6%}  #P_s6 .cnm{width:17%} #P_s6 .cqt{width:4%}
+#P_s6 .cmk{width:6%}  #P_s6 .ccur{width:8%} #P_s6 .cpl{width:9%}
+#P_s6 .cpho{width:15%} #P_s6 .cact{width:13%}
+
+#P_s8 .cuk{width:16%} #P_s8 .cic{width:6%}  #P_s8 .cnm{width:17%} #P_s8 .cqt{width:4%}
+#P_s8 .cmk{width:6%}  #P_s8 .ccur{width:8%} #P_s8 .cpl{width:9%}
+#P_s8 .cpho{width:15%} #P_s8 .cact{width:13%}
+
+/* STEP7 — Ready to Dispatch: tick + wooden packing + photo */
+#P_s7 .cuk{width:13%} #P_s7 .cic{width:5%}  #P_s7 .cnm{width:13%} #P_s7 .cqt{width:4%}
+#P_s7 .cmk{width:5%}  #P_s7 .ccur{width:7%} #P_s7 .cpl{width:8%}
+#P_s7 .cdone{width:8%} #P_s7 .cwood{width:9%} #P_s7 .cpho{width:13%} #P_s7 .cact{width:10%}
+
+/* STEP9 — Create bill of the product */
+#P_s9 .cuk{width:17%} #P_s9 .cic{width:6%}  #P_s9 .cnm{width:17%} #P_s9 .cqt{width:4%}
+#P_s9 .cmk{width:6%}  #P_s9 .ccur{width:8%} #P_s9 .cpl{width:10%}
+#P_s9 .cdoc{width:12%} #P_s9 .cdnum{width:14%}
+
+/* The read-only Location reads as reference data, not as something to action. */
+tbody td.ccur{color:#857f74;font-weight:600}
+
+
+.loc-na{font-size:10.5px;color:#bdb6aa;font-style:italic;white-space:nowrap}
+
+/* ══════════════ RESPONSIVE ══════════════ */
+/* Use dynamic viewport height so mobile browser chrome doesn't clip the table */
+
+
+/* Dropdowns must never overflow a narrow screen */
+.so-drop,.cfd{max-width:calc(100vw - 12px)}
+
+/* ── LAPTOP / TABLET (≤1200px): keep the table, scroll it sideways ── */
+@media (max-width:1200px){
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:860px}
+  .tabs{overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .uem{max-width:130px}
+}
+
+/* ── TABLET PORTRAIT (≤980px): shrink chrome, hide the user email text ── */
+@media (max-width:980px){
+  .src-hint{display:none}
+  .logo{font-size:13px;margin-right:12px}
+  .tab{padding:0 11px;font-size:11.5px}
+  .ubox{padding:4px 4px 4px 10px}
+  .uinfo{display:none}
+  .cbar{padding:6px 10px;gap:6px}
+  .content{padding:8px 8px 16px}
+}
+
+/* ── PHONE (≤860px): rows become stacked cards, no sideways scrolling ── */
+@media (max-width:860px){
+  body{font-size:14px}
+  .tlbl{display:none}                 /* section tabs collapse to icon + count */
+  .substrip{height:52px;padding:0 10px;gap:8px}
+  .sec-title{display:none}
+  .src-hint{display:none}
+  .seg{height:34px;padding:0 10px 0 6px;font-size:11.5px}
+  .wrap{margin-top:100px}
+  .cgrp.act{width:100%}
+  .tab{padding:0 12px;gap:6px}
+  .logo{font-size:12px;margin-right:8px}
+
+  .tbl-wrap{overflow-x:visible;max-height:none}
+  table{min-width:0;table-layout:auto;display:block}
+  thead{display:none}                 /* headers move into each cell label */
+  tbody,tbody tr,tbody td{display:block;width:auto}
+  /* scoped panel widths are for the desktop table only — cards ignore them */
+  #P_s2 td,#P_s3 td,#P_s4 td,#P_s5 td,#P_s6 td,#P_s7 td,#P_s8 td,#P_s9 td{width:auto!important}
+
+  /* the row Save button becomes full width and easy to hit */
+  tbody td.cact{border-bottom:none;padding-top:4px}
+  tbody td.cact::before{display:none}
+  .rowsave{width:100%;height:42px;font-size:13px}
+  .ph-wait{font-size:11px}
+  .phwrap{flex-wrap:wrap;justify-content:flex-start}
+  .ph-pick{height:38px;font-size:12.5px;padding:0 14px}
+
+  tbody tr{border:1.5px solid #e8e6e1;border-radius:9px;margin:0 0 9px;padding:4px 2px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  tbody tr:hover{background:#fff}
+  tbody tr.just-saved{background:#f0fdf4}
+
+  tbody td{padding:7px 11px;border-bottom:1px dashed #f0eeeb;display:flex;align-items:center;gap:10px;min-height:38px}
+  tbody td:last-child{border-bottom:none}
+  tbody td::before{content:attr(data-lbl);flex:0 0 42%;font-size:10px;font-weight:700;color:#A0A0A0;text-transform:uppercase;letter-spacing:.4px;line-height:1.2}
+  tbody td>*{flex:1;min-width:0}
+
+  /* the editable cell is the point of the card — make it stand out */
+  tbody td.edcell{background:#fffbeb;border-radius:6px;margin:2px 4px;border-bottom:none;min-height:44px}
+  tbody td.edcell::before{color:#8a7500}
+  .txt{height:34px;font-size:13px}
+  .ck-box{width:22px;height:22px}
+  .ckwrap{justify-content:flex-start}
+  .empty{padding:34px 16px}
+
+  /* control bar: stays usable, wraps onto as many lines as it needs */
+  .cbar{padding:7px 9px;gap:6px;height:auto;flex-wrap:wrap;row-gap:6px;overflow-x:visible}
+  .cgrp{flex-wrap:wrap}
+  .so-btn,.cinp{min-width:0}
+  .so-wrap{flex:1 1 100%}
+  .so-btn{width:100%}
+  #panels input[id$="_sr"]{flex:1 1 100%;min-width:0!important;width:100%}
+  .csep,.kbd{display:none}
+  .btn{height:34px}
+  .pill{padding:3px 8px}
+  .pgbar{flex-wrap:wrap}
+  .toast{left:12px;right:12px;bottom:12px;min-width:0}
+}
+
+/* sign-in gate on small screens */
+@media (max-width:520px){
+  .sg-card{width:calc(100vw - 28px)!important;max-width:none!important;padding:22px 18px!important}
+  .sg-title{font-size:16px!important}
+  .sg-sel,.sg-pw,.sg-go{height:44px!important;font-size:15px!important}
+}
+
+/* ── SMALL PHONE (≤430px) ── */
+@media (max-width:430px){
+  .logo b{padding:0}
+  .tab{padding:0 9px}
+  tbody td::before{flex-basis:46%}
+  .cbar{gap:5px}
+  .pill b{font-size:12px}
+}
+
+/* ══════════════ QR SCAN MODE ══════════════ */
+/* Common Scan button in the top bar — on every screen, every step. */
+.scan-top{margin-left:auto;height:34px;padding:0 14px;border-radius:8px;border:2px solid #F5C800;background:#F5C800;color:#1A1A1A;
+  font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;
+  margin-right:8px;transition:all .12s;box-shadow:0 2px 8px rgba(245,200,0,.3)}
+.scan-top:hover{background:#ffd81a}
+.scan-top:active{transform:translateY(1px)}
+.scan-top.off{display:none}
+.scan-top + .ubox{margin-left:0}
+@media (max-width:860px){.scan-top{height:36px;padding:0 12px}}
+@media (max-width:430px){.scan-top-lbl{display:none}.scan-top{padding:0 10px}}
+/* Rows added through the scanner are marked in the normal grid as well. */
+tbody tr.scanned{background:#fffbeb;box-shadow:inset 3px 0 0 #F5C800}
+tbody tr.scanned:hover{background:#fff7d1}
+
+#scOv{position:fixed;inset:0;z-index:9500;background:rgba(26,26,26,.92);display:flex;align-items:center;justify-content:center;padding:14px}
+#scOv.off{display:none}
+.sc-card{background:#1A1A1A;color:#fff;border:1.5px solid #333;border-radius:14px;width:min(96vw,980px);max-height:min(96vh,760px);
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6)}
+.sc-top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #333;flex-shrink:0}
+.sc-title{font-size:14px;font-weight:800;letter-spacing:-.2px;white-space:nowrap}
+.sc-title b{color:#F5C800}
+.sc-step{font-size:11px;color:#bbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-cnt{margin-left:auto;background:#F5C800;color:#1A1A1A;font-size:12px;font-weight:800;border-radius:20px;padding:4px 12px;white-space:nowrap}
+.sc-x{width:36px;height:36px;border-radius:8px;border:1.5px solid #444;background:#2a2a2a;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0}
+.sc-x:hover{background:#F5C800;color:#1A1A1A;border-color:#F5C800}
+.sc-body{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:0;flex:1;min-height:0}
+.sc-cam{padding:12px;border-right:1px solid #333;display:flex;flex-direction:column;gap:9px;min-width:0}
+.sc-frame{position:relative;border-radius:12px;overflow:hidden;background:#000;border:3px solid #444;transition:border-color .12s,box-shadow .12s;aspect-ratio:1/1}
+.sc-frame.ok{border-color:#16a34a;box-shadow:0 0 0 4px rgba(22,163,74,.35)}
+.sc-frame.bad{border-color:#dc2626;box-shadow:0 0 0 4px rgba(220,38,38,.35)}
+#scReader{width:100%;height:100%}
+#scReader video{width:100%!important;height:100%!important;object-fit:cover;display:block}
+#scReader img{display:none}
+.sc-msg{font-size:11.5px;color:#ddd;line-height:1.45;min-height:16px}
+.sc-msg.err{color:#f87171;font-weight:600}
+.sc-paused{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(0,0,0,.72);color:#fff;font-size:13px;font-weight:600;text-align:center;padding:12px}
+.sc-frame.paused .sc-paused{display:flex}
+.sc-ctl{display:flex;gap:7px;flex-wrap:wrap}
+.sc-btn{height:38px;padding:0 13px;border-radius:8px;border:1.5px solid #444;background:#2a2a2a;color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sc-btn:hover{border-color:#F5C800}
+.sc-btn.y{background:#F5C800;border-color:#F5C800;color:#1A1A1A}
+.sc-btn.y:hover{background:#e6ba00}
+.sc-btn.g{background:#16a34a;border-color:#16a34a;color:#fff}
+.sc-btn:disabled{opacity:.4;cursor:not-allowed}
+.sc-man{display:flex;gap:6px}
+.sc-man input{flex:1;min-width:0;height:38px;padding:0 10px;border:1.5px solid #444;border-radius:8px;background:#111;color:#fff;font-family:inherit;font-size:12px;outline:none}
+.sc-man input:focus{border-color:#F5C800}
+.sc-list{padding:12px;overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:8px}
+.sc-list-h{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#A0A0A0;display:flex;align-items:center;gap:8px}
+.sc-list-h span{margin-left:auto;color:#F5C800}
+.sc-so{font-size:11px;font-weight:700;color:#F5C800;background:#2a2a2a;border-radius:6px;padding:5px 9px;display:flex;align-items:center;gap:8px;margin-top:4px}
+.sc-so b{margin-left:auto;background:#F5C800;color:#1A1A1A;border-radius:10px;padding:1px 8px;font-size:10px}
+.sc-item{background:#242424;border:1.5px solid #333;border-radius:10px;padding:9px 10px;display:flex;align-items:center;gap:10px;animation:tup .2s ease}
+.sc-item.nophoto{border-color:#b45309}
+.sc-item.last{border-color:#16a34a}
+.sc-ph{width:52px;height:52px;border-radius:8px;flex-shrink:0;background:#111;border:2px solid #444;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;overflow:hidden}
+.sc-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.sc-ph.need{border-color:#b45309;background:#2b1d0a}
+.sc-it{flex:1;min-width:0}
+.sc-k{font-size:11.5px;font-weight:700;word-break:break-word;line-height:1.3}
+.sc-d{font-size:10.5px;color:#bbb;margin-top:2px;line-height:1.4;word-break:break-word}
+.sc-d i{color:#F5C800;font-style:normal;font-weight:700}
+.sc-st{font-size:10px;font-weight:700;margin-top:3px;color:#16a34a}
+.sc-item.nophoto .sc-st{color:#f59e0b}
+.sc-rm{width:32px;height:32px;border-radius:7px;border:1.5px solid #5a2a2a;background:#2a1414;color:#f87171;font-size:14px;cursor:pointer;flex-shrink:0}
+.sc-rm:hover{background:#dc2626;color:#fff;border-color:#dc2626}
+.sc-empty{color:#777;font-size:12px;text-align:center;padding:30px 10px}
+.sc-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #333;flex-shrink:0;align-items:center}
+.sc-foot .sc-hint{font-size:10.5px;color:#999;flex:1;line-height:1.4}
+/* Scanner-only tab (opened outside the Google frame so the live camera works). */
+body.standalone{background:#1A1A1A}
+body.standalone .top,body.standalone .substrip,body.standalone #panels,body.standalone #ov,body.standalone #sgGate,body.standalone .cfd{display:none!important}
+body.standalone #scOv{padding:0;align-items:stretch}
+body.standalone .sc-card{width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:none;border-radius:0;border:none}
+body.standalone .sc-x{display:none}
+.sc-link{font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;background:#2a2a2a;color:#bbb;border:1px solid #444;white-space:nowrap}
+.sc-link.ok{background:#14532d;color:#86efac;border-color:#16a34a}
+.sc-link.wait{background:#3b2a07;color:#fde68a;border-color:#b45309}
+/* "Click the item picture" prompt over the live camera after a match. */
+.sc-cap{position:absolute;inset:0;display:none;flex-direction:column;justify-content:flex-end;gap:8px;padding:12px;background:linear-gradient(to bottom,rgba(0,0,0,0) 35%,rgba(0,0,0,.85))}
+.sc-frame.capturing .sc-cap{display:flex}
+.sc-cap-k{font-size:12px;font-weight:700;color:#F5C800;text-align:center;word-break:break-word;line-height:1.3;text-shadow:0 1px 4px #000}
+.sc-cap-t{font-size:12px;color:#fff;text-align:center;text-shadow:0 1px 4px #000}
+.sc-cap .sc-btn{height:48px;font-size:15px;justify-content:center}
+.sc-cap .sc-btn.sm{height:36px;font-size:12px;background:rgba(42,42,42,.85)}
+.sc-done{background:#14532d;border:1.5px solid #16a34a;color:#bbf7d0;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;display:none}
+.sc-done.on{display:block}
+
+/* Permission help — shown when the live camera is refused. */
+.sc-perm{display:none;background:#2b1d0a;border:1.5px solid #b45309;border-radius:10px;padding:11px 12px;font-size:12px;line-height:1.5;color:#fde68a}
+.sc-perm.on{display:block}
+.sc-perm h4{margin:0 0 6px;font-size:13px;color:#fff}
+.sc-perm ol{margin:6px 0 8px 18px;padding:0}
+.sc-perm li{margin:3px 0}
+.sc-perm b{color:#F5C800}
+.sc-perm .sc-ctl{margin-top:8px}
+.sc-perm.blocked{background:#2a1414;border-color:#dc2626;color:#fecaca}
+
+/* ── RESPONSIVE: tablets and phones get the scanner full-screen ── */
+@media (max-width:1024px){
+  .sc-body{grid-template-columns:minmax(260px,360px) 1fr}
+}
+@media (max-width:860px){
+  #scOv{padding:0;align-items:stretch}
+  .sc-card{width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:none;border-radius:0;border:none}
+  .sc-body{display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sc-cam{border-right:none;border-bottom:1px solid #333;flex-shrink:0;padding:10px}
+  .sc-frame{width:min(100%,360px);margin:0 auto}
+  .sc-list{flex:1 0 auto;overflow:visible;padding:10px}
+  .sc-btn{height:44px;font-size:13.5px;flex:1 1 auto;justify-content:center}
+  .sc-man input{height:44px;font-size:15px}
+  .sc-top{padding:8px 10px;gap:8px}
+  .sc-title{font-size:13px}
+  .sc-foot{flex-wrap:wrap;gap:7px;padding:9px 10px;background:#1A1A1A}
+  .sc-foot .sc-hint{flex:1 1 100%;font-size:10px}
+  .sc-foot .sc-btn{flex:1 1 46%}
+  .sc-item{padding:9px}
+  .sc-ph{width:58px;height:58px}
+}
+@media (max-width:430px){
+  .sc-step{display:none}
+  .sc-frame{width:min(100%,300px)}
+  .sc-ctl .sc-btn{padding:0 8px;font-size:12.5px}
+}
+@media (max-height:600px) and (max-width:860px){
+  .sc-frame{width:min(100%,240px)}
+}
+</style>
+</head>
+<body>
+<div id="ov"><div class="spin"></div><div class="ov-t" id="ov-t">Loading…</div><div class="ov-err" id="ov-e"></div>
+  <button class="btn primary" id="ov-retry" style="display:none;margin-top:6px" onclick="loadData()">↺ Retry</button></div>
+<div class="cfd" id="cfd">
+  <div class="cfd-status" id="cfdStatus">
+    <div class="cfd-range-lbl">Status / colour</div>
+    <div id="cfdStatusList"></div>
+  </div>
+  <div class="cfd-range" id="cfdRange"><div class="cfd-range-lbl">Number range</div>
+    <div class="cfd-range-row"><input type="text" id="cfdMin" inputmode="decimal" placeholder="Min" oninput="cfdLiveApply()"><span>to</span><input type="text" id="cfdMax" inputmode="decimal" placeholder="Max" oninput="cfdLiveApply()"></div></div>
+  <input type="text" class="cfd-srch" id="cfdSrch" placeholder="Search values…" oninput="cfdSearch()">
+  <div class="cfd-list" id="cfdList"></div>
+  <div class="cfd-foot">
+    <button class="btn primary" style="font-size:10px;height:26px" onclick="cfdApply()">Apply</button>
+    <button class="btn" style="font-size:10px;height:26px" onclick="cfdClear()">Clear Filter</button>
+    <button class="btn" style="font-size:10px;height:26px" onclick="cfdClose()">Cancel</button>
+  </div>
+</div>
+<div class="top">
+  <div class="logo"><b>Dispatch</b> FMS</div>
+  <div class="tabs">
+    <button class="tab on" id="T_sec_dsp" onclick="goSection('dsp')"><span class="tico">🚚</span><span class="tlbl">Dispatch</span><span class="badge" id="bsec_dsp">—</span></button>
+  </div>
+  <button class="scan-top" id="scanTop" title="Scan item QR stickers" onclick="scanOpenCommon()">📷 <span class="scan-top-lbl">Scan</span></button>
+  <div class="ubox" onclick="signOut()" title="Click to change user">
+    <div class="uav" id="uAv">?</div>
+    <div class="uinfo"><div class="uem" id="uEm">—</div><div class="uts" id="uTs">—</div></div>
+  </div>
+</div>
+<div class="substrip" id="substrip"></div>
+<div id="panels"></div>
+<script>
+/* __BOOT__ */
+var PS = 100;
+
+var COL = {
+  uniqueKey:    { cls:'cuk',   label:'SO / Client', filter:true, cell:'uk' },
+  itemCode:     { cls:'cic',   label:'Item Code', filter:true },
+  itemName:     { cls:'cnm',   label:'Item Name', filter:true },
+  qty:          { cls:'cqt',   label:'Qty', filter:true, num:true, center:true },
+  make:         { cls:'cmk',   label:'Make', filter:true },
+  model:        { cls:'cmk',   label:'Model', filter:true },
+  planned:      { cls:'cpl',   label:'Planned', cell:'planned', filter:true, dateCol:true },
+  photo:        { cls:'cpho',  label:'Photos', edit:'photo', center:true },
+  rowSave:      { cls:'cact',  label:'Save', cell:'rowsave', center:true },
+  docType:      { cls:'cdoc',  label:'Document (DC / Bill)', edit:'select', opts:['DC','Bill'], filter:true },
+  docNumber:    { cls:'cdnum', label:'DC / Bill Number', edit:'text', filter:true },
+  plannedDate:  { cls:'cdt',   label:'Plan Dispatch Date', edit:'date', filter:true },
+  readyDispatch:{ cls:'cdone', label:'Ready to Dispatch (required)', edit:'check', center:true, filter:true },
+  moveRequired: { cls:'cmove', label:'Required to move?', edit:'select', opts:['Yes','No'], filter:true },
+  // Only asked when the answer above is Yes — the list comes from the Location
+  // tab. Named "Move to Location" so it cannot be mistaken for the read-only
+  // Location column, which is where the item is NOW.
+  location:     { cls:'cloc',  label:'Move to Location', edit:'select', optsFrom:'LOCATIONS', filter:true },
+  // One tick answers both questions: tick it only when wooden packing WAS
+  // needed AND it is finished. Left unticked means no packing was required —
+  // which is why this one is optional and never blocks a save.
+  woodenPacking:{ cls:'cwood', label:'Wooden Packing Done (only if required in item)', edit:'check', center:true, filter:true, optional:true },
+
+  // ── STEP2 / STEP3 / STEP4 ──
+  piRequired:   { cls:'cpir',   label:'Is PI Required?', edit:'select', opts:['Yes','No'], filter:true },
+  piNumber:     { cls:'cpi',   label:'PI Number', edit:'text', ph:'PI number', filter:true },
+  piMailed:     { cls:'cmail', label:'Mail Sent', edit:'check', center:true, filter:true },
+  amtReceived:  { cls:'camt',  label:'Amount Received', edit:'text', ph:'amount', filter:true, num:true },
+  // Read-only, straight from DB_format's PI Number column — shown on STEP4 so
+  // the amount is logged against the right PI.
+  dbPi:         { cls:'cpiro', label:'PI Number', filter:true },
+  // Read-only, DB_format's Location column — where the item is now. Part of RO
+  // below, so it shows on EVERY step.
+  curLocation:  { cls:'ccur',  label:'Location', filter:true }
+};
+
+// The read-only block every step carries. Location sits here, so the item's
+// current whereabouts is visible on all eight steps, with its own column filter.
+var RO    = ['uniqueKey','itemCode','itemName','qty','make','model','curLocation','planned'];
+
+// `branch` makes a field conditional: it is only asked when the controlling
+// field holds one of `when`. Everything else in the app — the cell, the save
+// validation, the bulk Fill and what gets written — reads this one spec, so a
+// branch can never be enforced in one place and forgotten in another.
+var PCFG = {
+  s2: { step:'STEP2', ro:RO, edits:['piRequired','plannedDate'],
+        branch:{ plannedDate:{ on:'piRequired', when:['No'],
+                               note:{ Yes:'PI required — no date needed' } } },
+        ico:'🗓️', etxt:'No pending STEP2 (plan the dispatch) tasks.' },
+
+  s3: { step:'STEP3', ro:RO, edits:['piNumber','piMailed'],
+        ico:'📧', etxt:'No pending STEP3 (create and mail PI) tasks.' },
+
+  s4: { step:'STEP4', ro:RO.concat(['dbPi']), edits:['amtReceived'],
+        ico:'💰', etxt:'No pending STEP4 (payment received against PI) tasks.' },
+
+  s5: { step:'STEP5', ro:RO, edits:['moveRequired','location','plannedDate'],
+        branch:{ location:   { on:'moveRequired', when:['Yes'], note:{ No:'not moving' } },
+                 plannedDate:{ on:'moveRequired', when:['No'],  note:{ Yes:'moving — set location' } } },
+        ico:'🔀', etxt:'No pending STEP5 (required to move?) tasks.' },
+
+  s6: { step:'STEP6', ro:RO, edits:['photo'], tail:['rowSave'],
+        ico:'📦', etxt:'No pending STEP6 (loading for shifting) tasks.' },
+
+  s7: { step:'STEP7', ro:RO, edits:['readyDispatch','woodenPacking','photo'], tail:['rowSave'],
+        ico:'✅', etxt:'No pending STEP7 (ready to dispatch) tasks.' },
+
+  s8: { step:'STEP8', ro:RO, edits:['photo'], tail:['rowSave'],
+        ico:'🚚', etxt:'No pending STEP8 (loading of the product) tasks.' },
+
+  s9: { step:'STEP9', ro:RO, edits:['docType','docNumber'],
+        ico:'🧾', etxt:'No pending STEP9 (create bill of the product) tasks.' }
+};
+
+// field -> which payload key it writes, and the word a tick writes.
+// THE single source of truth for the save. initPanels checks every edit field
+// in PCFG appears here, so a field can never be added to a step and then
+// silently write nowhere.
+var WRITE = {
+  plannedDate:   { key:'plannedDate' },
+  photo:         { key:'photoUrl' },
+  readyDispatch: { key:'done',          yes:'Yes' },
+  woodenPacking: { key:'woodenPacking', yes:'Done' },
+  piMailed:      { key:'piMailed',      yes:'Yes' },
+  docType:       { key:'docType' },
+  docNumber:     { key:'docNumber' },
+  moveRequired:  { key:'moveRequired' },
+  location:      { key:'location' },
+  piRequired:    { key:'piRequired' },
+  piNumber:      { key:'piNumber' },
+  amtReceived:   { key:'amtReceived' }
+};
+
+var DATA_TABS = Object.keys(PCFG);
+// One section (Dispatch) with eight steps.
+var SECT   = { dsp: DATA_TABS.slice() };
+var SECLBL = { dsp: 'Dispatch' };
+var SRC    = { dsp: 'DB_format → Dispatch Data' };
+var STEPLBL = { s2: 'Plan the Dispatch',       s3: 'Create and Mail PI',
+                s4: 'Payment Received vs PI',  s5: 'Required to Move?',
+                s6: 'Loading for Shifting',    s7: 'Ready to Dispatch',
+                s8: 'Loading of the Product',  s9: 'Create Bill of the Product' };
+var CUR = { sec: 'dsp', sub: { dsp: 's2' } };
+var DATA_LOADED = false;
+var LOCATIONS = [];      // STEP5 location dropdown, from the Location tab
+var P = {}, ED = {}, rowmap = {}, saving = {}, _dbt = {};
+var cfd = { pid:'', field:'', th:null, allVals:[], numeric:false, isDate:false };
+
+function initPanels() {
+  var problems = [];
+  for (var pid in PCFG) {
+    var cfg = PCFG[pid];
+    cfg.cols = cfg.ro.concat(cfg.edits, cfg.tail || []);   // tail = display-only trailing columns
+
+    // Catch a mis-wired step at start-up instead of at save time. Every column
+    // must exist in COL, every editable field must have a WRITE target, and
+    // every branch must point at a field the step actually shows.
+    cfg.cols.forEach(function(f){ if (!COL[f]) problems.push(pid + ': no COL entry for "' + f + '"'); });
+    cfg.edits.forEach(function(f){ if (!WRITE[f]) problems.push(pid + ': "' + f + '" has no WRITE target'); });
+    var br = cfg.branch || {};
+    for (var bf in br) {
+      if (cfg.edits.indexOf(bf) === -1) problems.push(pid + ': branch on "' + bf + '" which is not edited here');
+      if (cfg.edits.indexOf(br[bf].on) === -1) problems.push(pid + ': branch of "' + bf + '" depends on "' + br[bf].on + '" which is not edited here');
+    }
+
+    var num = {};
+    cfg.cols.forEach(function(f){ if (COL[f] && COL[f].num) num[f] = 1; });
+    P[pid] = { data:[], view:[], pg:0, soSel:[], soAll:[], CF:{}, CFR:{}, CFS:[], num:num, cols:cfg.cols, cfg:cfg };
+    ED[pid] = {};
+    rowmap[pid] = {};
+  }
+  if (problems.length) {
+    // Visible, not a white screen — the dashboard still opens and says what is wrong.
+    try { console.error('Dispatch FMS config problems:\n' + problems.join('\n')); } catch (e) {}
+    setTimeout(function(){ toast('Step configuration problem: ' + problems[0], 'err'); }, 1200);
+  }
+}
+
+// '' means the field is being asked on this row. Anything else is the note to
+// show in its place, because the row's answer above made it irrelevant.
+function branchNote(pid, uk, f) {
+  var b = (P[pid].cfg.branch || {})[f];
+  if (!b) return '';
+  var cur = String(ev(pid, uk, b.on) || '');
+  if (cur === '') return b.blank || 'answer above first';
+  if (b.when.indexOf(cur) !== -1) return '';
+  return (b.note && b.note[cur]) || 'not needed';
+}
+
+// True when this field is actually being asked of this row.
+function asked(pid, uk, f) { return branchNote(pid, uk, f) === ''; }
+
+function buildPanels() {
+  var host = ge('panels'), html = '';
+  for (var pid in PCFG) html += panelPage(pid);
+  host.innerHTML = html;
+  for (var p2 in PCFG) buildHead(p2);
+}
+
+function panelPage(pid) {
+  var cfg = P[pid].cfg;
+  return '<div class="page' + (pid === 's2' ? ' on' : '') + '" id="P_' + pid + '"><div class="wrap">' +
+    '<div class="cbar">' + panelCbar(pid) + '</div>' +
+    '<div class="content"><div class="tcard"><div class="tbl-wrap"><table><thead id="th_' + pid + '"></thead><tbody id="tb_' + pid + '"></tbody></table>' +
+    '<div class="empty" id="em_' + pid + '" style="display:none"><div class="empty-ico">' + cfg.ico + '</div><p>' + xe(cfg.etxt) + '</p></div></div>' +
+    '<div class="pgbar" id="pg_' + pid + '_bar" style="display:none"><div class="pg-info" id="pg_' + pid + '_info"></div>' +
+    '<div style="display:flex;gap:5px"><button class="btn" id="pg_' + pid + '_p" onclick="pgMove(\'' + pid + '\',-1)">← Prev</button>' +
+    '<button class="btn" id="pg_' + pid + '_n" onclick="pgMove(\'' + pid + '\',1)">Next →</button></div></div>' +
+    '</div></div></div></div>';
+}
+
+function panelCbar(pid) {
+  var cfg = P[pid].cfg, h = '';
+  // group 1 — filters
+  h += '<div class="cgrp">';
+  h += '<div class="so-wrap"><button class="so-btn" id="so_' + pid + '_btn" onclick="soOpen(\'' + pid + '\',event)">All SOs ▾</button>' +
+    '<div class="so-drop" id="so_' + pid + '_drop"><input type="text" class="so-srch" id="so_' + pid + '_srch" placeholder="Search SOs…" oninput="soBuild(\'' + pid + '\')">' +
+    '<label class="so-selall"><input type="checkbox" id="so_' + pid + '_chkall" onchange="soClickAll(\'' + pid + '\')"> Select All</label>' +
+    '<div class="so-list" id="so_' + pid + '_list"></div>' +
+    '<div class="so-foot"><button class="btn primary" style="height:26px;font-size:10px" onclick="soApply(\'' + pid + '\')">Apply</button>' +
+    '<button class="btn" style="height:26px;font-size:10px" onclick="soClearAll(\'' + pid + '\')">Clear All</button>' +
+    '<button class="btn" style="height:26px;font-size:10px" onclick="soClose(\'' + pid + '\')">Cancel</button></div></div></div>';
+  h += '<input type="text" class="cinp" id="f_' + pid + '_sr" placeholder="🔍 Search…" oninput="dbt(\'' + pid + '\')" style="width:128px;min-width:90px;flex:0 1 128px">';
+  h += '</div><div class="csep"></div>';
+  // group 2 — stats
+  h += '<div class="cgrp"><div class="pill p-tot"><b id="st_' + pid + '_tot">—</b> Total</div><div class="pill p-gray"><b id="st_' + pid + '_sho">—</b> Shown</div>' +
+    '<div class="pill p-red"><b id="st_' + pid + '_ovd">—</b> Overdue</div><div class="pill p-green"><b id="st_' + pid + '_fil">—</b> Filled</div></div>';
+  h += '<div class="csep"></div>';
+  // group 3 — bulk + actions
+  var bulk = '';
+  cfg.edits.forEach(function(f){ bulk += bulkControl(pid, f); });
+  var hasFill = cfg.edits.some(function(f){ var e = COL[f].edit; return e && e !== 'check' && e !== 'photo'; });
+  h += '<div class="cgrp act">' + (bulk ? '<span class="clbl">Bulk:</span>' + bulk : '') +
+       (hasFill ? '<button class="btn yellow" title="Apply the values above to every row shown" onclick="bulkFillAll(\'' + pid + '\')">Fill</button>' : '');
+  // QR scan mode — only on the steps listed in SCAN_STEPS (Code.gs).
+  if (scanEnabled(pid)) {
+    h += '<button class="btn yellow scanbtn" id="scb_' + pid + '" title="Scan the QR sticker on each item" onclick="scanOpen(\'' + pid + '\')">📷 Scan</button>';
+  }
+  h += '<div class="csep"></div>';
+  h += '<button class="btn green" id="sv_' + pid + '" onclick="save(\'' + pid + '\')">💾 Save</button><span class="unsaved" id="uns_' + pid + '" title="You have unsaved changes">●</span>';
+  h += '<button class="btn" onclick="clr(\'' + pid + '\')">✕ Clear</button>' +
+    '<button class="btn primary" onclick="loadData(true)">↺ Refresh</button></div>';
+  return h;
+}
+
+function bulkControl(pid, f) {
+  var def = COL[f], id = 'b_' + pid + '_' + f, lbl = xe(def.label);
+  // Ticks keep their own pair of buttons — they are an action, not a value.
+  if (def.edit === 'check') {
+    return '<span class="clbl">' + xe(def.label.split('(')[0].replace(/\s*Done\s*$/, '').trim()) + '</span>' +
+      '<button class="btn yellow" title="Tick every row shown" onclick="bulkCheck(\'' + pid + '\',\'' + f + '\',true)">✓ All</button>' +
+      '<button class="btn" title="Untick every row shown" onclick="bulkCheck(\'' + pid + '\',\'' + f + '\',false)">Clear</button>';
+  }
+  if (def.edit === 'photo') return '';          // each row needs its own picture
+  if (def.edit === 'date') {
+    return '<input type="date" class="cinp" id="' + id + '" title="' + lbl + '" style="width:134px" onkeydown="bulkKeydown(event,\'' + pid + '\')">';
+  }
+  if (f === 'location') {                       // options come from the Location tab
+    var lo = '<option value="">— Location —</option>';
+    LOCATIONS.forEach(function(x){ lo += '<option value="' + xe(x) + '">' + xe(x) + '</option>'; });
+    return '<select class="csel" id="' + id + '" style="width:112px" title="' + lbl + '">' + lo + '</select>';
+  }
+  if (def.edit === 'select') {
+    var o = '<option value="">— ' + xe(def.label.split('(')[0].trim()) + ' —</option>';
+    def.opts.forEach(function(x){ o += '<option value="' + xe(x) + '">' + xe(x) + '</option>'; });
+    return '<select class="csel" id="' + id + '" style="width:112px" title="' + lbl + '">' + o + '</select>';
+  }
+  if (def.edit === 'text') {
+    return '<input type="text" class="cinp" id="' + id + '"' + (def.num ? ' inputmode="decimal"' : '') +
+      ' placeholder="' + xe(def.ph || def.label) + '" title="' + lbl + '" style="width:118px" onkeydown="bulkKeydown(event,\'' + pid + '\')">';
+  }
+  return '';
+}
+
+// Applies EVERY bulk box that has something in it, in one press, to the rows
+// currently shown. One button instead of one per field keeps the bar on a
+// single line and means a step like "Required to move?" is filled in one go.
+function bulkFillAll(pid) {
+  var V = P[pid].view;
+  if (!V.length) { toast('No rows in view to fill', 'err'); return; }
+  var done = [], bad = '', skipped = 0;
+
+  // Order matters: a controlling field (Is PI Required? / Required to move?) is
+  // applied BEFORE the field it controls, so filling both in one press lands on
+  // the right rows instead of being judged against the previous answer.
+  var ed = P[pid].cfg.edits.slice().sort(function(a, b) {
+    return (controlsBranch(pid, b).length ? 1 : 0) - (controlsBranch(pid, a).length ? 1 : 0);
+  });
+
+  ed.forEach(function(f) {
+    var def = COL[f];
+    if (def.edit === 'check' || def.edit === 'photo') return;
+    var val = (gv('b_' + pid + '_' + f) || '').trim();
+    if (val === '') return;
+    if (def.edit === 'date' && !validDate(val)) { bad = def.label; return; }
+    var hit = 0;
+    for (var i = 0; i < V.length; i++) {
+      var uk = V[i].uniqueKey;
+      // Never fill a row that is not being asked this field — a planned date
+      // must not land on a row whose answer was "PI required: Yes".
+      if (!asked(pid, uk, f)) { skipped++; continue; }
+      setEv(pid, uk, f, val);
+      hit++;
+    }
+    if (hit) done.push(def.label.split('(')[0].trim() + ' ×' + hit);
+  });
+
+  if (bad) { toast('Invalid date in ' + bad, 'err'); return; }
+  if (!done.length) {
+    toast(skipped ? 'Nothing filled — those rows are not being asked that field'
+                  : 'Set a value above first, then press Fill', 'err');
+    return;
+  }
+  rnd(pid); unsaved(pid);
+  toast('Filled ' + done.join(', ') + (skipped ? ' (' + skipped + ' not applicable)' : ''), 'ok');
+}
+
+function buildHead(pid) {
+  var cols = P[pid].cols, h = '<tr>';
+  for (var c = 0; c < cols.length; c++) {
+    var f = cols[c], def = COL[f],
+      center = def.center ? ' style="justify-content:center"' : '',
+      lab = xe(def.label);
+    if (def.filter) h += '<th class="' + def.cls + '"><div class="th-inner" onclick="thOpen(\'' + pid + '\',\'' + f + '\',this)"><span class="th-txt">' + lab + '</span><span class="th-flt">▾</span></div></th>';
+    else h += '<th class="' + def.cls + '"><div class="th-inner nf"' + center + '><span class="th-txt">' + lab + '</span></div></th>';
+  }
+  ge('th_' + pid).innerHTML = h + '</tr>';
+}
+
+function goSection(sec) {
+  CUR.sec = sec;
+  cfdClose(); soCloseAll();
+  Object.keys(SECT).forEach(function(s){ ge('T_sec_' + s).classList.toggle('on', s === sec); });
+  buildSubstrip(sec);
+  showPanel(CUR.sub[sec]);
+}
+
+// Steps with nothing pending are hidden, so the strip only ever shows work that
+// exists. Before the first load nothing is known yet, so all steps show.
+function visibleSteps(sec) {
+  var all = SECT[sec];
+  if (!DATA_LOADED) return all;
+  var withRows = all.filter(function(pid){ return P[pid].data.length > 0; });
+  return withRows.length ? withRows : all;   // never leave an empty strip
+}
+
+function buildSubstrip(sec) {
+  var cur = CUR.sub[sec], h = '<div class="sec-title">' + xe(SECLBL[sec]) + '</div><div class="seg-wrap">';
+  visibleSteps(sec).forEach(function(pid) {
+    var num = PCFG[pid].step.replace('STEP', '');
+    h += '<button class="seg' + (pid === cur ? ' on' : '') + '" onclick="goStep(\'' + pid + '\')">' +
+         '<span class="scirc">' + num + '</span><span>' + xe(STEPLBL[pid]) + '</span>' +
+         '<span class="scount" id="sb_' + pid + '">' + P[pid].data.length + '</span></button>';
+  });
+  h += '</div><div class="src-hint">Source <b>' + xe(SRC[sec]) + '</b></div>';
+  ge('substrip').innerHTML = h;
+}
+
+function goStep(pid) {
+  CUR.sub[CUR.sec] = pid;
+  buildSubstrip(CUR.sec);
+  showPanel(pid);
+}
+
+function showPanel(pid) {
+  cfdClose(); soCloseAll();
+  DATA_TABS.forEach(function(p){ ge('P_' + p).classList.toggle('on', p === pid); });
+}
+
+function activePanel() { return CUR.sub[CUR.sec]; }
+
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { cfdClose(); soCloseAll(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); save(activePanel()); }
+});
+
+// The lock gate is the only way in. It calls LOCKGATE_onUnlock below once the
+// password checks out server-side; only then does the app load any data.
+window.addEventListener('load', function() {
+  if (window.SA && SA.on) return;        // scanner-only tab: no dashboard, no sign-in
+  initPanels(); buildPanels(); buildSubstrip('dsp');
+  tryResumeSession();
+});
+
+// Called by the lock gate after a correct password (or a restored session).
+var SESS_KEY = 'dispatchfms.session.DF';
+
+// A correct password buys 2 hours. The signed token is stored with its expiry,
+// so a refresh inside that window reopens the dashboard with no password.
+function saveSession(name, token, expiresAt) {
+  try { localStorage.setItem(SESS_KEY, JSON.stringify({ n: name, t: token, e: expiresAt })); }
+  catch (e) { /* private mode — the session simply won't survive a refresh */ }
+}
+
+function readSession() {
+  try {
+    var o = JSON.parse(localStorage.getItem(SESS_KEY) || 'null');
+    if (o && o.t && o.e && new Date().getTime() < o.e) return o;
+  } catch (e) { /* corrupt entry — treat as signed out */ }
+  return null;
+}
+
+function clearSession() { try { localStorage.removeItem(SESS_KEY); } catch (e) {} }
+
+// Called on load: if a live session exists, skip the gate entirely.
+function tryResumeSession() {
+  var o = readSession();
+  if (!o) return false;
+  CURRENT_USER = o.n; APP_TOKEN = o.t;
+  setUser();
+  var g = ge('sgGate'); if (g) g.classList.add('sg-off');
+  scheduleLock(o.e);
+  loadData();
+  return true;
+}
+
+// When the 2 hours run out with the tab still open, lock it again.
+function scheduleLock(expiresAt) {
+  var ms = expiresAt - new Date().getTime();
+  if (ms <= 0 || ms > 2147483000) return;
+  setTimeout(function() {
+    clearSession(); APP_TOKEN = '';
+    toast('Session expired — sign in again', 'inf');
+    if (typeof sgShowGate === 'function') sgShowGate();
+  }, ms);
+}
+
+// ── 2-HOUR SESSION ────────────────────────────────────────────
+// A correct password buys a signed token valid for 2 hours. It is kept in this
+// browser only; a refresh inside the 2 hours reopens the dashboard with no
+// password, and the server still re-checks the signature on every call, so an
+// edited or expired token gets nowhere.
+var SESSION_KEY = 'dispatchfms.session.DF';
+
+function sessionSave(name, token, expiresAt) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ n: name, t: token, e: expiresAt })); }
+  catch (e) { /* private mode — the app still works, just no resume */ }
+}
+function sessionLoad() {
+  try {
+    var raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    if (!o || !o.t || !o.e || new Date().getTime() >= o.e) { sessionClear(); return null; }
+    return o;
+  } catch (e) { return null; }
+}
+function sessionClear() { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+// Try to reopen without asking for the password. Returns true if it took over.
+function sessionResume() {
+  var o = sessionLoad();
+  if (!o) return false;
+  CURRENT_USER = o.n; APP_TOKEN = o.t;
+  setUser();
+  var g = ge('sgGate'); if (g) g.classList.add('sg-off');
+  showOv('Restoring your session…');
+  loadData();
+  return true;
+}
+
+function LOCKGATE_onUnlock(name, meta) {
+  CURRENT_USER = name || '';
+  setUser();
+  var pw = ge('sgPass') ? ge('sgPass').value : '';
+  // Exchange name+password for a signed token. The token — not the browser —
+  // is what tells the server whose DB tab to read, so one person cannot load
+  // another person's rows by editing anything client-side.
+  google.script.run
+    .withSuccessHandler(function(r) {
+      if (r && r.ok) {
+        APP_TOKEN = r.token;
+        saveSession(name, r.token, r.expiresAt);   // stay signed in for 2 hours
+        scheduleLock(r.expiresAt);
+        loadData();
+      }
+      else { ovErr((r && r.error) || 'Sign-in failed'); }
+    })
+    .withFailureHandler(function(e) { ovErr('Sign-in failed: ' + (e && e.message || 'unknown')); })
+    .signIn(name, pw);
+}
+
+// Switch user / sign out — always ends the session first.
+function signOut() {
+  clearSession(); APP_TOKEN = ''; CURRENT_USER = '';
+  if (typeof sgShowGate === 'function') sgShowGate();
+}
+
+function LOCKGATE_onLock() { APP_TOKEN = ''; clearSession(); }
+
+function setUser() {
+  ge('uEm').textContent = CURRENT_USER || '-';
+  ge('uAv').textContent = CURRENT_USER ? CURRENT_USER.charAt(0).toUpperCase() : '?';
+  ge('uAv').title = CURRENT_USER;
+}
+
+function requireUser() {
+  if (!CURRENT_USER || !APP_TOKEN) { toast('Your session ended — sign in again', 'err'); if (typeof sgShowGate === 'function') sgShowGate(); return false; }
+  return true;
+}
+
+// ── SIGN-IN GATE ──────────────────────────────────────────────
+var CURRENT_USER = '', APP_TOKEN = '', BOOTDATA = null;
+
+
+
+
+
+
+
+
+
+
+// ── DATA LOAD ─────────────────────────────────────────────────
+
+// The server says the signature is stale or expired — end the session and ask
+// for the password again rather than leaving a dead dashboard on screen.
+function sessionExpired() {
+  sessionClear(); APP_TOKEN = ''; hideOv();
+  toast('Your 2-hour session ended — please sign in again', 'err');
+  if (typeof sgShowGate === 'function') sgShowGate();
+}
+
+function ovErr(m) {
+  if (String(m || '').indexOf('SESSION_EXPIRED') !== -1) { sessionExpired(); return; } ge('ov-e').textContent = m; ge('ov-retry').style.display = 'inline-flex'; ge('ov').classList.remove('off'); }
+
+function loadData(fresh) {
+  ge('ov-e').textContent = '';
+  ge('ov-retry').style.display = 'none';
+  showOv(fresh ? 'Refreshing…' : 'Loading data…');
+  var done = false,
+    tmo = setTimeout(function(){ if (!done) ovErr('Server timed out. In the Apps Script editor run testConnection and check the log, then Retry.'); }, 25000);
+  google.script.run.withSuccessHandler(function(r) {
+    done = true; clearTimeout(tmo); hideOv();
+    (!r || !r.ok) ? ovErr(r ? r.error : 'No response') : onData(r);
+  }).withFailureHandler(function(e) {
+    done = true; clearTimeout(tmo); hideOv();
+    ovErr('Error: ' + (e && e.message || 'unknown'));
+  }).loadAll(APP_TOKEN, !!fresh);
+}
+
+function onData(r) {
+  setUser();
+  var n = new Date();
+  ge('uTs').textContent = 'Refreshed ' + pad(n.getHours()) + ':' + pad(n.getMinutes());
+  var rows = r.rows || [];
+  DATA_TABS.forEach(function(pid) {
+    P[pid].data = rows.filter(function(x){ return x.stepCode === PCFG[pid].step; });
+  });
+  LOCATIONS = r.locations || [];
+  refillLocationPickers();      // the bulk bar was built before this list arrived
+  // Where the rows came from, shown quietly in the source line under the step
+  // strip. No toast and no error — a person signing in should just see their
+  // work. An admin can read the line, or run checkNamesLinks() for the detail.
+  // `hidden` is how many steps were left out because they are already recorded
+  // in Dispatch Data, so a shrinking list is explained rather than puzzling.
+  SRC.dsp = (r.source ? r.source : 'DB_format') + ' → Dispatch Data' +
+            (r.hidden ? ('  ·  ' + r.hidden + ' already saved, hidden') : '');
+
+  // When nothing is allotted, the empty panels say WHY in plain words instead
+  // of reading as "no pending tasks" — and instead of the old behaviour, which
+  // filled the dashboard with other people's rows.
+  DATA_TABS.forEach(function(pid) {
+    var em = ge('em_' + pid);
+    if (!em) return;
+    var p = em.querySelector('p');
+    if (p) p.textContent = r.notice ? r.notice : PCFG[pid].etxt;
+  });
+  DATA_TABS.forEach(function(pid) {
+    ED[pid] = {}; rowmap[pid] = {};
+    ge('uns_' + pid).style.display = 'none';
+    P[pid].CF = {}; P[pid].CFR = {}; P[pid].CFS = [];
+    P[pid].soAll = uniq(P[pid].data.map(function(x){ return x.so; }));
+    P[pid].soSel.length = 0;
+    soBuild(pid); soUpdBtn(pid);
+  });
+  document.querySelectorAll('th.filtered').forEach(function(t){ t.classList.remove('filtered'); });
+  Object.keys(SECT).forEach(function(sec) {
+    var n = 0; SECT[sec].forEach(function(pid){ n += P[pid].data.length; });
+    ge('bsec_' + sec).textContent = n;
+  });
+  DATA_LOADED = true;
+  var vis = visibleSteps(CUR.sec);
+  if (vis.indexOf(CUR.sub[CUR.sec]) === -1) { CUR.sub[CUR.sec] = vis[0]; showPanel(vis[0]); }
+  buildSubstrip(CUR.sec);
+  DATA_TABS.forEach(function(pid){ flt(pid); });
+}
+
+// The control bar is built once, at page load — before sign-in, so before the
+// Location tab has been read. Any bulk Location dropdown therefore starts with
+// nothing in it, which is why bulk-filling a location silently did nothing.
+// Refilled here the moment the list arrives, keeping whatever was selected.
+function refillLocationPickers() {
+  DATA_TABS.forEach(function(pid) {
+    if (P[pid].cfg.edits.indexOf('location') === -1) return;
+    var sel = ge('b_' + pid + '_location');
+    if (!sel) return;
+    var keep = sel.value;
+    var h = '<option value="">— Location —</option>';
+    LOCATIONS.forEach(function(x){ h += '<option value="' + xe(x) + '">' + xe(x) + '</option>'; });
+    sel.innerHTML = h;
+    if (keep && LOCATIONS.indexOf(keep) !== -1) sel.value = keep;
+  });
+}
+
+// ── SO FILTER ─────────────────────────────────────────────────
+function soOpen(pid, e) {
+  if (e) e.stopPropagation();
+  var drop = ge('so_' + pid + '_drop'), was = drop.classList.contains('open');
+  cfdClose(); soCloseAll();
+  if (!was) {
+    drop.classList.add('open');
+    ge('so_' + pid + '_btn').classList.add('act');
+    var rc = ge('so_' + pid + '_btn').getBoundingClientRect();
+    drop.style.top = (rc.bottom + 3) + 'px';
+    drop.style.left = Math.max(4, Math.min(rc.left, window.innerWidth - 410)) + 'px';
+    ge('so_' + pid + '_srch').value = '';
+    soBuild(pid);
+    ge('so_' + pid + '_srch').focus();
+  }
+}
+
+function soClose(pid) { var d = ge('so_' + pid + '_drop'); if (d) { d.classList.remove('open'); ge('so_' + pid + '_btn').classList.remove('act'); } }
+function soCloseAll() { DATA_TABS.forEach(soClose); }
+
+function soClickAll(pid) {
+  if (ge('so_' + pid + '_chkall').checked) { P[pid].soAll.forEach(function(v){ if (P[pid].soSel.indexOf(v) === -1) P[pid].soSel.push(v); }); }
+  else P[pid].soSel.length = 0;
+  soBuild(pid);
+}
+
+function soBuild(pid) {
+  // Built from the rows that pass the search, the column filters and the status
+  // filter — so the list shrinks as you narrow, and each count is exactly how
+  // many rows that SO would show. An SO you have ticked stays listed even at 0,
+  // otherwise you could not untick it.
+  var base = rowsForFilter(pid, 'so'), sel = P[pid].soSel;
+  var cnt = {}, order = [];
+  base.forEach(function(r) {
+    if (!r.so) return;
+    if (cnt[r.so] == null) { cnt[r.so] = 0; order.push(r.so); }
+    cnt[r.so]++;
+  });
+  sel.forEach(function(v){ if (cnt[v] == null) { cnt[v] = 0; order.push(v); } });
+  order.sort();
+
+  var srch = ge('so_' + pid + '_srch') ? ge('so_' + pid + '_srch').value.toLowerCase() : '', h = '';
+  var vis = [];
+  order.forEach(function(v) {
+    if (srch && v.toLowerCase().indexOf(srch) === -1) return;
+    vis.push(v);
+    h += '<label class="so-row"><input type="checkbox" ' + (sel.indexOf(v) !== -1 ? 'checked ' : '') +
+         'data-p="' + pid + '" data-v="' + xe(v) + '" onchange="soItemChg(this)"><span>' + xe(v) + '</span>' +
+         '<span class="so-row-cnt">(' + cnt[v] + ')</span></label>';
+  });
+  if (!h) h = '<div style="padding:8px 12px;font-size:11px;color:#A0A0A0">No results</div>';
+  ge('so_' + pid + '_list').innerHTML = h;
+
+  P[pid].soAll = order;                       // keep "Select All" honest
+  var selVis = vis.filter(function(v){ return sel.indexOf(v) !== -1; }),
+      ca = ge('so_' + pid + '_chkall');
+  if (ca) {
+    ca.checked = (vis.length > 0 && selVis.length === vis.length);
+    ca.indeterminate = (selVis.length > 0 && selVis.length < vis.length);
+  }
+}
+
+function soItemChg(cb) {
+  var pid = cb.getAttribute('data-p'), v = cb.getAttribute('data-v'), sel = P[pid].soSel, i = sel.indexOf(v);
+  if (cb.checked) { if (i === -1) sel.push(v); } else { if (i !== -1) sel.splice(i, 1); }
+  var ca = ge('so_' + pid + '_chkall'), all = P[pid].soAll;
+  ca.checked = (sel.length > 0 && sel.length === all.length);
+  ca.indeterminate = (sel.length > 0 && sel.length < all.length);
+}
+
+function soApply(pid) { soClose(pid); soUpdBtn(pid); flt(pid); }
+function soClearAll(pid) { P[pid].soSel.length = 0; soBuild(pid); soUpdBtn(pid); soApply(pid); }
+
+function soUpdBtn(pid) {
+  var sel = P[pid].soSel, b = ge('so_' + pid + '_btn');
+  b.textContent = sel.length === 0 ? 'All SOs ▾' : sel.length === 1 ? (sel[0].substring(0, 24) + (sel[0].length > 24 ? '…' : '') + ' ▾') : sel.length + ' SOs ▾';
+  b.classList.toggle('act', sel.length > 0);
+}
+
+document.addEventListener('click', function(e) {
+  DATA_TABS.forEach(function(pid) {
+    var d = ge('so_' + pid + '_drop'), b = ge('so_' + pid + '_btn');
+    if (d && d.classList.contains('open') && !d.contains(e.target) && !b.contains(e.target)) soClose(pid);
+  });
+  var c = ge('cfd');
+  if (c.classList.contains('open') && !c.contains(e.target) && (!cfd.th || !cfd.th.contains(e.target))) cfdClose();
+});
+
+// ── EDIT STATE ────────────────────────────────────────────────
+function ev(pid, uk, f) { return (ED[pid] && ED[pid][uk] && ED[pid][uk][f] != null) ? ED[pid][uk][f] : ''; }
+
+function setEv(pid, uk, f, val) {
+  if (!ED[pid]) ED[pid] = {};
+  if (!ED[pid][uk]) ED[pid][uk] = {};
+  if (val === '' || val == null || val === false) delete ED[pid][uk][f];
+  else ED[pid][uk][f] = val;
+  if (ED[pid][uk] && !keys(ED[pid][uk]).length) delete ED[pid][uk];
+}
+
+function isEdit(pid, f) { return P[pid].cfg.edits.indexOf(f) !== -1; }
+
+function fieldVal(pid, r, f) {
+  if (isEdit(pid, f)) {
+    var def = COL[f], v = ev(pid, r.uniqueKey, f);
+    if (def.edit === 'check') return v ? 'Yes' : '';
+    if (def.edit === 'date') return v ? dmy(v) : '';
+    return v == null ? '' : v;
+  }
+  return r[f] == null ? '' : r[f];
+}
+
+// The three states the Planned column is colour-coded with. The status filter
+// below lets you pick them directly — red (overdue), amber (today), green (future).
+function dateStatus(r) {
+  if (!r.planned) return 'No date';
+  if (r.overdue > 0) return 'Overdue';
+  if (r.overdue === 0) return 'Today';
+  return 'Future';
+}
+var STATUS_ORDER = ['Overdue', 'Today', 'Future', 'No date'];
+
+function srVal(pid) { return (gv('f_' + pid + '_sr') || '').toLowerCase().trim(); }
+function soOk(pid, r) { var s = P[pid].soSel; return s.length === 0 || s.indexOf(r.so) !== -1; }
+function srOk(pid, sr, r) {
+  if (!sr) return true;
+  // Everything the row actually carries is searchable — including the PI number
+  // raised at STEP3 and the item's current location, so "61/10" or a PI finds it.
+  return [r.so, r.clientName, r.itemCode, r.itemName, r.make, r.model, r.uniqueKey,
+          r.doerName, r.stepText, r.size, r.curLocation, r.dbPi]
+    .map(function(x){ return x || ''; }).join(' ').toLowerCase().indexOf(sr) !== -1;
+}
+function rangeOk(R, val) { var n = parseFloat(val); if (isNaN(n)) return false; if (R.min != null && n < R.min) return false; if (R.max != null && n > R.max) return false; return true; }
+
+function statusOk(pid, r) {
+  var a = P[pid].CFS;
+  return !a || !a.length || a.indexOf(dateStatus(r)) !== -1;
+}
+
+function cfOk(pid, r) {
+  var f = P[pid].CF;
+  for (var k in f) { var a = f[k]; if (a && a.length && a.indexOf(String(fieldVal(pid, r, k))) === -1) return false; }
+  var rg = P[pid].CFR;
+  for (var k2 in rg) { if (!rangeOk(rg[k2], fieldVal(pid, r, k2))) return false; }
+  return statusOk(pid, r);
+}
+
+// Rows passing every filter EXCEPT the one being built, so each dropdown shows
+// only values that can actually be picked, with counts that match what the
+// table would show. `except` is a column name, or 'so' / 'status'.
+function rowsForFilter(pid, except) {
+  var sr = srVal(pid), f = P[pid].CF, rg = P[pid].CFR;
+  return P[pid].data.filter(function(r) {
+    if (except !== 'so' && !soOk(pid, r)) return false;
+    if (!srOk(pid, sr, r)) return false;
+    if (except !== 'status' && !statusOk(pid, r)) return false;
+    for (var k in f) { if (k === except) continue; var a = f[k]; if (a && a.length && a.indexOf(String(fieldVal(pid, r, k))) === -1) return false; }
+    for (var k2 in rg) { if (k2 === except) continue; if (!rangeOk(rg[k2], fieldVal(pid, r, k2))) return false; }
+    return true;
+  });
+}
+
+// ── COLUMN FILTER DROPDOWN ────────────────────────────────────
+function thOpen(pid, field, inner) {
+  var th = inner.closest('th') || inner.parentElement;
+  if (cfd.pid === pid && cfd.field === field && ge('cfd').classList.contains('open')) { cfdClose(); return; }
+  cfdClose(); soCloseAll();
+  cfd.pid = pid; cfd.field = field; cfd.th = th;
+  cfd.numeric = !!P[pid].num[field];
+  cfd.allVals = uniqSort(rowsForFilter(pid, field).map(function(r){ return String(fieldVal(pid, r, field)); }), cfd.numeric);
+  ge('cfdSrch').value = '';
+  ge('cfdRange').classList.toggle('on', cfd.numeric);
+  cfd.isDate = !!COL[field].dateCol;
+  ge('cfdStatus').classList.toggle('on', cfd.isDate);
+  if (cfd.isDate) buildStatusFilter(pid);
+  var rg = P[pid].CFR[field] || {};
+  ge('cfdMin').value = (rg.min == null ? '' : rg.min);
+  ge('cfdMax').value = (rg.max == null ? '' : rg.max);
+  cfdBuild();
+  var rc = th.getBoundingClientRect(), d = ge('cfd');
+  d.style.top = (rc.bottom + 2) + 'px';
+  d.style.left = Math.max(4, Math.min(rc.left, window.innerWidth - 310)) + 'px';
+  d.classList.add('open');
+  (cfd.numeric ? ge('cfdMin') : ge('cfdSrch')).focus();
+}
+
+// Overdue / Today / Future / No date — each with a live count and its colour.
+function buildStatusFilter(pid) {
+  var rows = rowsForFilter(pid, 'status'), cnt = {}, sel = P[pid].CFS;
+  rows.forEach(function(r){ var k = dateStatus(r); cnt[k] = (cnt[k] || 0) + 1; });
+  var h = '';
+  STATUS_ORDER.forEach(function(st) {
+    if (!cnt[st]) return;
+    var on = !sel.length || sel.indexOf(st) !== -1;
+    var cls = st === 'Overdue' ? 'st-ovr' : st === 'Today' ? 'st-tdy' : st === 'Future' ? 'st-fut' : 'st-non';
+    h += '<label class="cfd-item"><input type="checkbox" value="' + st + '" ' + (on ? 'checked' : '') +
+         ' onclick="statusClick()"><span class="st-dot ' + cls + '"></span>' + st +
+         '<span class="so-row-cnt">(' + cnt[st] + ')</span></label>';
+  });
+  ge('cfdStatusList').innerHTML = h || '<div style="padding:6px 12px;font-size:11px;color:#A0A0A0">No dates</div>';
+}
+
+function statusClick() {
+  var picked = [], boxes = ge('cfdStatusList').querySelectorAll('input');
+  boxes.forEach(function(b){ if (b.checked) picked.push(b.value); });
+  P[cfd.pid].CFS = (picked.length === boxes.length) ? [] : picked;
+  if (cfd.th) cfd.th.classList.toggle('filtered', !!P[cfd.pid].CFS.length || !!P[cfd.pid].CF[cfd.field]);
+  flt(cfd.pid);
+}
+
+function cfdBuild() {
+  var active = P[cfd.pid].CF[cfd.field] || null,
+    srch = ge('cfdSrch').value.toLowerCase(),
+    fl = cfd.allVals.filter(function(v){ return !srch || v.toLowerCase().indexOf(srch) !== -1; });
+  var allChk = !active || fl.every(function(v){ return active.indexOf(v) !== -1; });
+  var h = '<div class="cfd-all" onclick="cfdAllClick()"><input type="checkbox" id="cfdAllChk" ' + (allChk ? 'checked' : '') + ' onclick="event.stopPropagation()">(Select All)</div>';
+  for (var i = 0; i < fl.length; i++) {
+    var v = fl[i], chk = !active || active.indexOf(v) !== -1;
+    h += '<label class="cfd-item"><input type="checkbox" value="' + xe(v) + '" ' + (chk ? 'checked' : '') + ' onclick="cfdItemClick(this)">' + xe(v || '(blank)') + '</label>';
+  }
+  ge('cfdList').innerHTML = h;
+}
+
+function cfdAllClick() {
+  var c = ge('cfdAllChk');
+  c.checked = !c.checked;
+  ge('cfdList').querySelectorAll('.cfd-item input').forEach(function(x){ x.checked = c.checked; });
+  cfdLiveApply();
+}
+
+function cfdItemClick() {
+  var it = ge('cfdList').querySelectorAll('.cfd-item input'),
+    ck = ge('cfdList').querySelectorAll('.cfd-item input:checked'),
+    a = ge('cfdAllChk');
+  a.checked = it.length > 0 && it.length === ck.length;
+  a.indeterminate = ck.length > 0 && ck.length < it.length;
+  cfdLiveApply();
+}
+
+function readRange() {
+  var mn = ge('cfdMin').value.trim(), mx = ge('cfdMax').value.trim(), r = {};
+  if (mn !== '' && !isNaN(Number(mn))) r.min = Number(mn);
+  if (mx !== '' && !isNaN(Number(mx))) r.max = Number(mx);
+  return (r.min == null && r.max == null) ? null : r;
+}
+
+function cfdLiveApply() {
+  var checked = [];
+  ge('cfdList').querySelectorAll('.cfd-item input:checked').forEach(function(c){ checked.push(c.value); });
+  if (checked.length === 0 || checked.length === cfd.allVals.length) delete P[cfd.pid].CF[cfd.field];
+  else P[cfd.pid].CF[cfd.field] = checked;
+  if (cfd.numeric) { var rg = readRange(); if (rg) P[cfd.pid].CFR[cfd.field] = rg; else delete P[cfd.pid].CFR[cfd.field]; }
+  if (cfd.th) cfd.th.classList.toggle('filtered', !!P[cfd.pid].CF[cfd.field] || !!P[cfd.pid].CFR[cfd.field]);
+  flt(cfd.pid);
+}
+
+function cfdSearch() { cfdBuild(); }
+function cfdApply() { cfdLiveApply(); cfdClose(); }
+function cfdClear() {
+  if (cfd.isDate) P[cfd.pid].CFS = [];
+  delete P[cfd.pid].CF[cfd.field];
+  delete P[cfd.pid].CFR[cfd.field];
+  if (cfd.th) cfd.th.classList.remove('filtered');
+  var pid = cfd.pid;
+  cfdClose(); flt(pid);
+}
+function cfdClose() { ge('cfd').classList.remove('open'); cfd.pid = ''; cfd.field = ''; cfd.th = null; cfd.numeric = false; cfd.isDate = false; }
+
+// ── RENDER ────────────────────────────────────────────────────
+function dbt(pid) { clearTimeout(_dbt[pid]); _dbt[pid] = setTimeout(function(){ flt(pid); }, 150); }
+
+function flt(pid) {
+  var sr = srVal(pid);
+  soBuild(pid);          // keep the SO list and its counts in step with the rest
+  P[pid].view = P[pid].data.filter(function(r){ return soOk(pid, r) && cfOk(pid, r) && srOk(pid, sr, r); });
+  P[pid].pg = 0;
+  rnd(pid);
+}
+
+function rnd(pid) {
+  var pan = P[pid], V = pan.view, tb = ge('tb_' + pid), em = ge('em_' + pid);
+  if (!V.length) { tb.innerHTML = ''; em.style.display = 'block'; ge('pg_' + pid + '_bar').style.display = 'none'; updStats(pid); return; }
+  em.style.display = 'none';
+  var s = pan.pg * PS, e = Math.min(s + PS, V.length);
+  renderPanel(pid, s, e);
+  pgBar(pid, V.length, pan.pg);
+  updStats(pid);
+}
+
+function renderPanel(pid, s, e) {
+  var V = P[pid].view, sr = srVal(pid), cols = P[pid].cols, p = [];
+  for (var i = s; i < e; i++) {
+    var r = V[i], gi = i, uk = r.uniqueKey;
+    rowmap[pid][gi] = uk;
+    var tds = '';
+    for (var c = 0; c < cols.length; c++) {
+      var f = cols[c], def = COL[f];
+      // data-lbl feeds the mobile card view (CSS ::before) — harmless on desktop
+      var dl = ' data-lbl="' + xe(def.label) + '"';
+      if (def.cell === 'uk') { tds += '<td class="cuk"' + dl + '><span class="km">' + hl(r.uniqueKey, sr) + '</span><span class="ks">' + hl(r.so, sr) + '</span></td>'; continue; }
+      if (def.cell === 'planned') { tds += '<td class="cpl"' + dl + '>' + dtd(r) + '</td>'; continue; }
+      if (def.cell === 'rowsave') { tds += '<td class="cact"' + dl + ' style="text-align:center">' + rowSaveCell(pid, gi, uk) + '</td>'; continue; }
+      var style = def.center ? ' style="text-align:center"' : '';
+      if (def.edit) { tds += '<td class="' + def.cls + ' edcell"' + dl + style + '>' + editCell(pid, f, gi, uk) + '</td>'; continue; }
+      var val = r[f];
+      tds += '<td class="' + def.cls + '"' + dl + style + '>' + (f === 'qty' ? xe(val) : hl(val, sr)) + '</td>';
+    }
+    p.push('<tr' + (scanIsPending(pid, uk) ? ' class="scanned"' : '') + '>' + tds + '</tr>');
+  }
+  ge('tb_' + pid).innerHTML = p.join('');
+}
+
+function editCell(pid, f, gi, uk) {
+  var def = COL[f], v = ev(pid, uk, f);
+
+  // A conditional field shows why it is not being asked, instead of an input
+  // the person could fill in by mistake. One rule, every step, every field.
+  var note = branchNote(pid, uk, f);
+  if (note) return '<span class="loc-na">' + xe(note) + '</span>';
+
+  if (def.edit === 'photo') return photoCell(pid, gi, uk, v);
+  if (def.edit === 'date') {
+    return '<input type="date" class="txt' + (v ? ' hv' : '') + '" value="' + xe(v) + '" onchange="onEdit(\'' + pid + '\',' + gi + ',\'' + f + '\',this)">';
+  }
+  if (def.edit === 'check') {
+    return '<label class="ckwrap"><input type="checkbox" class="ck-box"' + (v ? ' checked' : '') + ' onchange="onChk(\'' + pid + '\',' + gi + ',\'' + f + '\',this)"></label>';
+  }
+  if (f === 'location') {
+    var oh = '<option value="">— pick location —</option>';
+    LOCATIONS.forEach(function(o){ oh += '<option value="' + xe(o) + '"' + (o === v ? ' selected' : '') + '>' + xe(o) + '</option>'; });
+    return '<select class="idsel' + (v ? ' hv' : '') + '" onchange="onEdit(\'' + pid + '\',' + gi + ',\'' + f + '\',this)">' + oh + '</select>';
+  }
+  if (def.edit === 'select') {
+    var o = '<option value="">— select —</option>';
+    def.opts.forEach(function(x){ o += '<option value="' + xe(x) + '"' + (x === v ? ' selected' : '') + '>' + xe(x) + '</option>'; });
+    return '<select class="idsel' + (v ? ' hv' : '') + '" onchange="onEdit(\'' + pid + '\',' + gi + ',\'' + f + '\',this)">' + o + '</select>';
+  }
+  if (f === 'amtReceived') {
+    // Numeric keypad on a phone, and digits / . / , only — so the amount that
+    // reaches the sheet is always a number.
+    return '<input type="text" class="txt' + (v ? ' hv' : '') + '" inputmode="decimal" value="' + xe(v) + '"' +
+      ' placeholder="' + xe(def.ph) + '" onkeydown="cellEnter(event,\'' + pid + '\',' + gi + ')"' +
+      ' oninput="onAmt(\'' + pid + '\',' + gi + ',\'' + f + '\',this)">';
+  }
+  if (f === 'docNumber') {
+    var kind = ev(pid, uk, 'docType');                    // DC | Bill | (none yet)
+    var ph   = kind ? (kind + ' Number') : 'Choose DC or Bill first';
+    var lock = kind ? '' : ' disabled';
+    return '<input type="text" class="txt' + (v ? ' hv' : '') + '"' + lock +
+      ' value="' + xe(v) + '" placeholder="' + xe(ph) + '" title="' + xe(ph) + '"' +
+      ' onkeydown="cellEnter(event,\'' + pid + '\',' + gi + ')"' +
+      ' oninput="onEdit(\'' + pid + '\',' + gi + ',\'' + f + '\',this)">';
+  }
+  if (def.edit === 'text') {
+    return '<input type="text" class="txt' + (v ? ' hv' : '') + '" value="' + xe(v) + '" placeholder="' + xe(def.ph || 'type…') + '" ' +
+      'onkeydown="cellEnter(event,\'' + pid + '\',' + gi + ')" ' +
+      'oninput="onEdit(\'' + pid + '\',' + gi + ',\'' + f + '\',this)">';
+  }
+  return '';
+}
+
+
+
+
+// Enter in a qty cell jumps to the next input in the same row (Received -> Loading),
+// then blurs on the last one. Tab still works as normal.
+// ── PHOTOS (STEP6 / STEP7 / STEP8) ───────────────────────────
+// Picked photos are held in the browser. NOTHING is uploaded until Save.
+var PEND = {}, PSEQ = 0;
+
+function shrinkImage(file, cb) {
+  var fr = new FileReader();
+  fr.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var max = 1024, w = img.width, h = img.height;
+      if (w > max || h > max) { var s = Math.min(max / w, max / h); w = Math.round(w * s); h = Math.round(h * s); }
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      var full = c.toDataURL('image/jpeg', 0.6);
+      var t = document.createElement('canvas'); t.width = 80; t.height = 80;
+      t.getContext('2d').drawImage(img, 0, 0, 80, 80);
+      cb(full, t.toDataURL('image/jpeg', 0.6));
+    };
+    img.onerror = function() { cb(null, null); };
+    img.src = e.target.result;
+  };
+  fr.onerror = function() { cb(null, null); };
+  fr.readAsDataURL(file);
+}
+
+// Photo steps (STEP6 / STEP7 / STEP8). The Save button stays hidden until a photo is attached to that
+// row, so there is nothing to press before the row is actually ready.
+function rowSaveCell(pid, gi, uk) {
+  var v = ev(pid, uk, 'photo');
+  if (!v || (!v.token && !v.url)) return '<span class="ph-wait">Click the picture first</span>';
+  return '<button class="btn green rowsave" onclick="saveOne(\'' + pid + '\',' + gi + ')">💾 Save row</button>';
+}
+
+// Saves just this one row — upload its photo, write it, then drop it from the
+// table so the list shrinks as the loader works through it.
+function saveOne(pid, gi) {
+  if (saving[pid]) { toast('Already saving…', 'inf'); return; }
+  if (!requireUser()) return;
+  var uk = rowmap[pid][gi];
+  if (!uk) return;
+
+  var row = null;
+  P[pid].data.forEach(function(r){ if (r.uniqueKey === uk) row = r; });
+  if (!row) return;
+
+  var gap = rowMissingField(pid, uk);
+  if (gap) { toast('Fill every field before saving — missing: ' + gap, 'err'); return; }
+
+  saving[pid] = true;
+  ge('sv_' + pid).disabled = true;
+  showOv('Saving 1 row…');
+  var savedKeys = {}; savedKeys[uk] = 1;
+  var batchId = 'B' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  uploadPendingThenSubmit(pid, [buildSaveRow(pid, row)], savedKeys, batchId);
+}
+
+// CAPTURE ONLY — STEP6 (Loading for Shifting), STEP7 (Ready to Dispatch) and
+// STEP8 (Loading of the Product) are the three photo steps, and all three take
+// the picture live. There is no gallery / file-picker route: the one input
+// carries capture="environment", so a phone opens the rear camera and the
+// photo has to be taken there and then. That is what makes it evidence the
+// item was actually seen at this step.
+function photoTake(cid) { var el = ge(cid + '_cam'); if (el) el.click(); }
+
+function photoCell(pid, gi, uk, v) {
+  var cid = 'ph_' + pid + '_' + gi;
+
+  // The input stays in the cell whether or not a photo is attached, so a bad
+  // shot can be retaken in place without removing the first one.
+  var h = '<span class="phwrap" id="' + cid + '">' +
+    '<input type="file" class="hidef" accept="image/*" capture="environment" id="' + cid + '_cam" onchange="photoPick(this,\'' + pid + '\',' + gi + ')">';
+
+  if (v && (v.token || v.url)) {
+    var open = v.url ? ' onclick="window.open(\'' + xe(v.url) + '\',\'_blank\')" title="Open full photo"'
+                     : ' title="Captured — press Save to upload"';
+    h += '<img class="ph-thumb" src="' + xe(v.thumb || '') + '"' + open + '>' +
+         '<span class="ph-ok">● Captured</span>' +
+         '<button class="ph-mini" title="Retake this photo" onclick="photoTake(\'' + cid + '\')">📷</button>' +
+         '<button class="ph-mini del" title="Remove this photo" onclick="photoClear(\'' + pid + '\',' + gi + ')">✕</button>';
+  } else {
+    h += '<button class="ph-pick cam" title="Open the camera and click the picture now" onclick="photoTake(\'' + cid + '\')">📷 Click Picture</button>';
+  }
+  return h + '</span>';
+}
+
+function photoPick(inp, pid, gi) {
+  var file = inp.files && inp.files[0];
+  inp.value = '';
+  if (!file) return;
+  if (file.size > 25 * 1024 * 1024) { toast('That image is over 25 MB — pick a smaller one', 'err'); return; }
+  var uk = rowmap[pid][gi];
+  if (!uk) return;
+  shrinkImage(file, function(full, thumb) {
+    if (!full) { toast('Could not read that image', 'err'); return; }
+    var tok = 'P' + (++PSEQ);
+    PEND[tok] = { full: full, name: file.name };
+    setEv(pid, uk, 'photo', { token: tok, thumb: thumb, name: file.name });
+    rnd(pid); unsaved(pid);
+    toast('Photo captured — press Save to upload', 'inf');
+  });
+}
+
+
+
+function photoClear(pid, gi) {
+  var uk = rowmap[pid][gi];
+  if (!uk) return;
+  setEv(pid, uk, 'photo', '');
+  rnd(pid); unsaved(pid);
+  toast('Photo removed — click another', 'inf');
+}
+
+// A photo row is only complete once it carries a photo.
+function rowMissingPhoto(pid, uk) {
+  var ed = P[pid].cfg.edits;
+  for (var i = 0; i < ed.length; i++) {
+    if (COL[ed[i]].edit === 'photo') { var v = ev(pid, uk, 'photo'); if (!v || (!v.token && !v.url)) return true; }
+  }
+  return false;
+}
+
+function cellEnter(e, pid, gi) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  var tr = e.target.closest('tr'); if (!tr) return;
+  var inputs = Array.prototype.slice.call(tr.querySelectorAll('input.txt'));
+  var i = inputs.indexOf(e.target);
+  if (i !== -1 && i < inputs.length - 1) { inputs[i + 1].focus(); inputs[i + 1].select(); }
+  else e.target.blur();
+}
+
+// Fields whose value controls whether another field on the same step is asked.
+// Answering one clears whatever its answer just made irrelevant, so a value
+// typed under the old answer can never be carried into the sheet.
+function controlsBranch(pid, f) {
+  var br = P[pid].cfg.branch || {}, out = [];
+  for (var dep in br) if (br[dep].on === f) out.push(dep);
+  return out;
+}
+
+function onEdit(pid, gi, f, el) {
+  var uk = rowmap[pid][gi];
+  if (!uk) return;
+  var v = el.value.trim();
+  setEv(pid, uk, f, v);
+
+  var deps = controlsBranch(pid, f);
+  if (deps.length) {
+    deps.forEach(function(dep){ if (!asked(pid, uk, dep)) setEv(pid, uk, dep, ''); });
+    updStats(pid); unsaved(pid); rnd(pid); return;    // redraw: the row's inputs changed
+  }
+  if (f === 'docType') {
+    // switching between DC and Bill clears a number typed under the old label
+    if (!v) setEv(pid, uk, 'docNumber', '');
+    updStats(pid); unsaved(pid); rnd(pid); return;
+  }
+  el.classList.toggle('hv', v !== '');
+  updStats(pid);
+  unsaved(pid);
+}
+
+// Amount cell: keeps only digits and one decimal point, so the sheet always
+// receives a real number and never "12,500/-" that no SUM can add up.
+function onAmt(pid, gi, f, el) {
+  var raw = el.value, at = el.selectionStart;
+  var clean = raw.replace(/[^0-9.]/g, '');
+  var bits = clean.split('.');
+  if (bits.length > 2) clean = bits.shift() + '.' + bits.join('');
+  if (clean !== raw) {
+    // Put the caret back where the typing was, counting only what survived.
+    var keptBefore = raw.slice(0, at).replace(/[^0-9.]/g, '').length;
+    el.value = clean;
+    try { el.setSelectionRange(keptBefore, keptBefore); } catch (e) {}
+  }
+  var uk = rowmap[pid][gi];
+  if (!uk) return;
+  setEv(pid, uk, f, clean);
+  el.classList.toggle('hv', clean !== '');
+  updStats(pid);
+  unsaved(pid);
+}
+
+function onChk(pid, gi, f, el) {
+  var uk = rowmap[pid][gi];
+  if (!uk) return;
+  setEv(pid, uk, f, el.checked ? true : '');
+  updStats(pid);
+  unsaved(pid);
+}
+
+function unsaved(pid) { ge('uns_' + pid).style.display = 'inline'; }
+
+// ── VALIDATION / STATS ────────────────────────────────────────
+function validDate(v) { return /^\d{4}-\d{2}-\d{2}$/.test(String(v)); }
+
+// "Filled" means exactly "this row would save" — the same test the Save button
+// uses, so the counter can never disagree with what actually happens. The old
+// version hardcoded one panel's fields and went stale the moment the steps were
+// renumbered, counting the wrong thing on two steps.
+function rowComplete(pid, r) {
+  return rowMissingField(pid, r.uniqueKey) === '' && rowStarted(pid, r.uniqueKey);
+}
+
+
+// Returns the label of the first required field this row is still missing,
+// or '' when the row is complete. One guard covers every edit type and every
+// step, so a new field can never be added without its validation.
+//
+// A conditional field is only required on the rows where it is actually asked:
+//   STEP2  PI required? Yes -> nothing more   |  No -> Plan Dispatch Date
+//   STEP5  Required to move? Yes -> Location  |  No -> Plan Dispatch Date
+function rowMissingField(pid, uk) {
+  var ed = P[pid].cfg.edits;
+  for (var i = 0; i < ed.length; i++) {
+    var f = ed[i], def = COL[f], v = ev(pid, uk, f);
+    if (def.optional) continue;                 // may be left blank on purpose
+    if (!asked(pid, uk, f)) continue;           // this row's answer made it irrelevant
+    if (def.edit === 'check')      { if (!v) return def.label; }
+    else if (def.edit === 'photo') { if (!v || (!v.token && !v.url)) return 'Photo'; }
+    else if (def.edit === 'date')  { if (!validDate(v)) return def.label; }
+    else                           { if (!String(v||'').trim()) return def.label; }
+  }
+  return '';
+}
+
+function rowMissingTick(pid, uk) {
+  var ed = P[pid].cfg.edits;
+  for (var i = 0; i < ed.length; i++) {
+    var f = ed[i];
+    if (COL[f].edit === 'check' && !ev(pid, uk, f)) return true;
+  }
+  return false;
+}
+
+
+function rowStarted(pid, uk) { var o = ED[pid] && ED[pid][uk]; return !!(o && keys(o).length); }
+
+function rowBadDate(pid, uk) {
+  var ed = P[pid].cfg.edits;
+  for (var i = 0; i < ed.length; i++) {
+    var f = ed[i], def = COL[f], v = ev(pid, uk, f);
+    if (def.edit === 'date' && v !== '' && !validDate(v)) return true;
+  }
+  return false;
+}
+
+function updStats(pid) {
+  var pan = P[pid], D = pan.data, n = 0;
+  for (var i = 0; i < D.length; i++) if (rowComplete(pid, D[i])) n++;
+  ge('st_' + pid + '_tot').textContent = D.length;
+  ge('st_' + pid + '_sho').textContent = pan.view.length;
+  ge('st_' + pid + '_ovd').textContent = cntOvd(pan.view);
+  ge('st_' + pid + '_fil').textContent = n;
+}
+
+// ── BULK ──────────────────────────────────────────────────────
+function bulkKeydown(e, pid) { if (e.key === 'Enter') { e.preventDefault(); bulkFillAll(pid); } }
+
+
+function bulkCheck(pid, f, flag) {
+  var V = P[pid].view, n = 0;
+  if (!V.length) { toast('No rows in view', 'err'); return; }
+  for (var i = 0; i < V.length; i++) {
+    var uk = V[i].uniqueKey;
+    if (!asked(pid, uk, f)) continue;
+    setEv(pid, uk, f, flag ? true : '');
+    n++;
+  }
+  rnd(pid); unsaved(pid);
+  toast((flag ? 'Ticked' : 'Cleared') + ' "' + COL[f].label.split('(')[0].trim() + '" for ' + n + ' row(s)', 'ok');
+}
+
+function clr(pid) {
+  P[pid].soSel.length = 0;
+  soUpdBtn(pid); soBuild(pid);
+  // CFS is the Planned-date colour filter (Overdue / Today / Future / No date).
+  // It was left behind by Clear, so the table stayed filtered with no filter
+  // marker showing and no obvious way to undo it.
+  P[pid].CF = {}; P[pid].CFR = {}; P[pid].CFS = [];
+  ED[pid] = {}; rowmap[pid] = {};
+  setVal('f_' + pid + '_sr', '');
+  P[pid].cfg.edits.forEach(function(f){ setVal('b_' + pid + '_' + f, ''); });
+  ge('uns_' + pid).style.display = 'none';
+  ge('P_' + pid).querySelectorAll('th.filtered').forEach(function(t){ t.classList.remove('filtered'); });
+  flt(pid);
+  toast('Filters, selections and inputs cleared', 'inf');
+}
+
+// ── SAVE ──────────────────────────────────────────────────────
+// Builds the payload for ONE row. Every key the server writes starts blank and
+// is filled only from the fields this step actually asks, through the WRITE
+// map — so a step can never write into another step's column, and a value left
+// behind by a changed answer is cleared rather than saved.
+function buildSaveRow(pid, r) {
+  var uk = r.uniqueKey;
+  var row = { uniqueKey:uk, stepCode:P[pid].cfg.step,
+              plannedDate:'', done:'', photoUrl:'', docNumber:'', docType:'',
+              woodenPacking:'', moveRequired:'', location:'',
+              piRequired:'', piNumber:'', piMailed:'', amtReceived:'' };
+
+  var ed = P[pid].cfg.edits;
+  for (var i = 0; i < ed.length; i++) {
+    var f = ed[i], def = COL[f], w = WRITE[f];
+    if (!w) continue;
+    // A field this row is not being asked contributes nothing.
+    if (!asked(pid, uk, f)) continue;
+    var v = ev(pid, uk, f);
+    if (def.edit === 'photo') {
+      row[w.key]      = (v && v.url)   ? v.url   : '';
+      row.photoToken  = (v && v.token) ? v.token : '';
+    } else if (def.edit === 'check') {
+      row[w.key] = v ? (w.yes || 'Yes') : '';
+    } else {
+      row[w.key] = v || '';
+    }
+  }
+  return row;
+}
+
+function save(pid) {
+  if (saving[pid]) { toast('Already saving…', 'inf'); return; }
+  if (!requireUser()) return;
+  var dmap = {};
+  P[pid].data.forEach(function(r){ dmap[r.uniqueKey] = r; });
+  var rows = [], bad = 0, miss = {}, missN = 0, touched = ED[pid] || {};
+  for (var uk in touched) {
+    var r = dmap[uk];
+    if (!r) continue;
+    if (!rowStarted(pid, uk)) continue;
+    var gap = rowMissingField(pid, uk);
+    if (gap) { miss[gap] = (miss[gap] || 0) + 1; missN++; continue; }
+    rows.push(buildSaveRow(pid, r));
+  }
+  var names = Object.keys(miss).map(function(k){ return k + ' (' + miss[k] + ')'; }).join(', ');
+
+  // Save whatever IS complete and leave the rest on screen. This matters where a
+  // field cannot be bulk-filled — a photo, for instance: you can tick the boxes
+  // for every row, photograph a few, and save those. Without this, one row
+  // missing its picture blocked the entire save.
+  if (!rows.length) {
+    if (missN) toast('Nothing saved — still missing: ' + names, 'err');
+    else toast('Nothing to save — fill at least one row first', 'err');
+    return;
+  }
+  if (missN) toast(rows.length + ' row(s) ready, ' + missN + ' left — still missing: ' + names, 'inf');
+  if (!confirm('Save ' + rows.length + ' row(s) of ' + P[pid].cfg.step + ' to the "Dispatch Data" sheet?')) return;
+
+  saving[pid] = true;
+  ge('sv_' + pid).disabled = true;
+  showOv('Saving ' + rows.length + ' rows…');
+  var savedKeys = {};
+  rows.forEach(function(x){ savedKeys[x.uniqueKey] = 1; });
+  // One id for this whole save. If a network hiccup makes us retry, the server
+  // recognises the id and won't write the rows twice.
+  var batchId = 'B' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  uploadPendingThenSubmit(pid, rows, savedKeys, batchId);
+}
+
+// Photos are held in the browser until Save. Here each distinct photo is
+// uploaded ONCE (a bulk photo covering 60 rows is still one upload), its Drive
+// link is written back into every row that carries its token, and only then are
+// the rows submitted. If any upload fails, nothing is saved at all.
+function uploadPendingThenSubmit(pid, rows, savedKeys, batchId) {
+  var toks = [], meta = {};
+  rows.forEach(function(r) {
+    if (!r.photoToken) return;
+    if (!meta[r.photoToken]) { meta[r.photoToken] = { first: r.uniqueKey, n: 0 }; toks.push(r.photoToken); }
+    meta[r.photoToken].n++;
+  });
+
+  function finish(map) {
+    // A row that carried a photo MUST end up with a URL. If any token has no
+    // link by now the picture never reached Drive, and writing the row anyway
+    // would record a completed step with an empty Photo URL — the photo is
+    // mandatory, so nothing is saved and the rows stay on screen to retry.
+    var lost = rows.filter(function(r) { return r.photoToken && !map[r.photoToken]; });
+    if (lost.length) {
+      hideOv(); saving[pid] = false; ge('sv_' + pid).disabled = false;
+      toast('The photo for ' + lost.length + ' row(s) was lost before upload — take it again. Nothing was saved.', 'err');
+      return;
+    }
+    rows.forEach(function(r) {
+      if (r.photoToken) { r.photoUrl = map[r.photoToken]; delete r.photoToken; }
+    });
+    submitRows(pid, rows, savedKeys, batchId, toks);
+  }
+
+  if (!toks.length) { finish({}); return; }
+
+  // Photos upload IN PARALLEL. Uploading them one after another meant the wait
+  // was the sum of every upload; now it is only as long as the slowest one.
+  var map = {}, done = 0, failed = false;
+  showOv(toks.length > 1 ? ('Uploading ' + toks.length + ' photos…') : 'Uploading photo…');
+
+  function fail(msg) {
+    if (failed) return;
+    failed = true;
+    hideOv(); saving[pid] = false; ge('sv_' + pid).disabled = false;
+    if (msg === 'SESSION_EXPIRED') sessionExpired();
+    else toast('Photo upload failed: ' + (msg || 'unknown') + ' — nothing was saved', 'err');
+  }
+
+  toks.forEach(function(tok) {
+    var p = PEND[tok];
+    // No payload held for this token — the picture is gone (a refresh, or the
+    // row was carried over from an earlier save). finish() catches it and
+    // refuses the save rather than writing a blank Photo URL.
+    if (!p) { done++; if (done === toks.length && !failed) finish(map); return; }
+    var m = meta[tok], label = m.n > 1 ? (m.first + '_and_' + (m.n - 1) + '_more') : m.first;
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (failed) return;
+        if (res && res.ok) {
+          map[tok] = res.url;
+          done++;
+          if (done < toks.length) showOv('Uploaded ' + done + ' of ' + toks.length + '…');
+          else finish(map);
+        } else fail(res && res.error);
+      })
+      .withFailureHandler(function(e) { fail(e && e.message); })
+      .uploadPhoto(p.full, p.name, label, APP_TOKEN, P[pid].cfg.step);
+  });
+}
+
+
+
+function submitRows(pid, rows, savedKeys, batchId, toks) {
+  showOv('Saving ' + rows.length + ' rows…');
+  var tmr = setTimeout(function() {
+    saving[pid] = false; ge('sv_' + pid).disabled = false; hideOv();
+    toast('Save timed out — re-deploy a NEW version with Execute as: Me, then retry.', 'err');
+  }, 30000);
+
+  var runner = google.script.run
+    .withSuccessHandler(function(res) {
+      clearTimeout(tmr);
+      saving[pid] = false;
+      ge('sv_' + pid).disabled = false;
+      hideOv();
+      if (res && res.ok) {
+        toast('Saved ' + res.saved + ' row(s) ✓', 'ok');
+        ge('uns_' + pid).style.display = 'none';
+        for (var k in savedKeys) delete ED[pid][k];
+        (toks || []).forEach(function(t) { delete PEND[t]; });
+        // A saved row is DONE — take it out of the pending list. Leaving it
+        // there with its inputs cleared made finished work look outstanding,
+        // and invited the same row being actioned twice.
+        dropSavedRows(pid, savedKeys);
+        flashRows(pid, savedKeys);
+      } else if (res && res.error === 'SESSION_EXPIRED') sessionExpired();
+      else toast('Error: ' + (res ? res.error : 'no response'), 'err');
+    })
+    .withFailureHandler(function(e) {
+      clearTimeout(tmr);
+      saving[pid] = false;
+      ge('sv_' + pid).disabled = false;
+      hideOv();
+      toast('Error: ' + (e && e.message || 'unknown'), 'err');
+    });
+
+  runner.submitDispatch(rows, APP_TOKEN, batchId);
+}
+
+// ── PAGINATION ────────────────────────────────────────────────
+function pgMove(pid, d) {
+  var tp = Math.ceil(P[pid].view.length / PS);
+  P[pid].pg = clamp(P[pid].pg + d, 0, tp - 1);
+  rnd(pid);
+}
+
+function pgBar(pid, tot, pg) {
+  var tp = Math.ceil(tot / PS), bar = ge('pg_' + pid + '_bar');
+  if (tp > 1) {
+    bar.style.display = 'flex';
+    ge('pg_' + pid + '_info').innerHTML = 'Showing <strong>' + (pg * PS + 1) + '–' + Math.min(pg * PS + PS, tot) + '</strong> of <strong>' + tot + '</strong> (Page ' + (pg + 1) + '/' + tp + ')';
+    ge('pg_' + pid + '_p').disabled = (pg === 0);
+    ge('pg_' + pid + '_n').disabled = (pg >= tp - 1);
+  } else bar.style.display = 'none';
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+function uniq(a) {
+  var s = {}, o = [];
+  for (var i = 0; i < a.length; i++) { var v = a[i]; if (v != null && v !== '' && !s[v]) { s[v] = 1; o.push(v); } }
+  return o.sort();
+}
+
+function uniqSort(a, num) {
+  var s = {}, o = [];
+  for (var i = 0; i < a.length; i++) { var v = a[i]; if (v != null && v !== '' && !s[v]) { s[v] = 1; o.push(v); } }
+  if (num) o.sort(function(x, y) {
+    var nx = parseFloat(x), ny = parseFloat(y);
+    if (isNaN(nx) && isNaN(ny)) return x < y ? -1 : 1;
+    if (isNaN(nx)) return 1;
+    if (isNaN(ny)) return -1;
+    return nx - ny;
+  });
+  else o.sort();
+  return o;
+}
+
+function dmy(v) { var m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? (m[3] + '/' + m[2] + '/' + m[1]) : String(v); }
+
+// Remove rows that were just written, refresh the counts and the step strip.
+function dropSavedRows(pid, savedKeys) {
+  P[pid].data = P[pid].data.filter(function(r){ return !savedKeys[r.uniqueKey]; });
+  P[pid].soAll = uniq(P[pid].data.map(function(x){ return x.so; }));
+  soBuild(pid); soUpdBtn(pid);
+  flt(pid);
+
+  Object.keys(SECT).forEach(function(sec) {
+    var n = 0; SECT[sec].forEach(function(p){ n += P[p].data.length; });
+    var b = ge('bsec_' + sec); if (b) b.textContent = n;
+  });
+  buildSubstrip(CUR.sec);
+  // If this step is now empty it disappears from the strip — move to one with work.
+  var vis = visibleSteps(CUR.sec);
+  if (vis.indexOf(CUR.sub[CUR.sec]) === -1) { CUR.sub[CUR.sec] = vis[0]; showPanel(vis[0]); buildSubstrip(CUR.sec); }
+}
+
+function flashRows(pid, km) {
+  ge('tb_' + pid).querySelectorAll('tr').forEach(function(tr) {
+    var k = tr.querySelector('.km');
+    if (k && km[k.textContent.trim()]) tr.classList.add('just-saved');
+  });
+}
+
+function cntOvd(a) { var n = 0; for (var i = 0; i < a.length; i++) if (a[i].overdue > 0) n++; return n; }
+
+function dtd(r) {
+  if (!r.planned) return '<span class="muted">—</span>';
+  var dc = r.overdue > 0 ? 'dovr' : r.overdue === 0 ? 'dtdy' : 'dok';
+  return '<span class="' + dc + '">' + xe(r.planned) + '</span>' + (r.overdue > 0 ? '<span class="otag">' + r.overdue + 'd</span>' : '');
+}
+
+function hl(t, sr) {
+  var s = xe(t);
+  if (!sr) return s;
+  var i = s.toLowerCase().indexOf(sr);
+  if (i === -1) return s;
+  return s.slice(0, i) + '<mark>' + s.slice(i, i + sr.length) + '</mark>' + s.slice(i + sr.length);
+}
+
+function keys(o) { return Object.keys(o || {}); }
+function clamp(v, a, b) { return Math.max(a, Math.min(v, b)); }
+function ge(id) { return document.getElementById(id); }
+function gv(id) { var e = ge(id); return e ? e.value : ''; }
+function setVal(id, v) { var e = ge(id); if (e) e.value = v; }
+function xe(s) { if (!s && s !== 0) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function pad(n) { return n < 10 ? '0' + n : String(n); }
+function showOv(t) { ge('ov-t').textContent = t || 'Loading…'; ge('ov').classList.remove('off'); }
+function hideOv() { ge('ov').classList.add('off'); }
+
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'toast ' + (type || 'inf');
+  var ico = { ok:'✅', err:'❌', inf:'ℹ️' };
+  el.innerHTML = '<span>' + (ico[type] || 'ℹ️') + '</span> ' + xe(msg);
+  document.body.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 4500);
+}
+
+// ══════════════════════════════════════════════════════════════
+// QR SCAN MODE — additive. Enabled per step through SCAN_STEPS in Code.gs,
+// delivered to the browser as SERVED_SCAN_STEPS via __BOOT__.
+//
+// Flow on a scan-enabled step:
+//   scan sticker -> key matched against the rows loaded on THIS step (O(1)
+//   lookup, no server call) -> camera opens for that item's photo -> the row
+//   is now filled exactly as if the grid's "Click Picture" had been used.
+// Nothing is written until the existing 💾 Save. Saved rows leave the step on
+// reload, so they cannot be scanned again — no extra duplicate logic here.
+// ══════════════════════════════════════════════════════════════
+// Served from Code.gs (SCAN_STEPS). If the page was served by an older
+// Code.gs that does not inject it, STEP8 is still scan-enabled by default, so
+// the common Scan button never silently disappears.
+var SCAN_STEPS = (typeof SERVED_SCAN_STEPS !== 'undefined' && SERVED_SCAN_STEPS && SERVED_SCAN_STEPS.length)
+  ? SERVED_SCAN_STEPS : ['STEP8'];
+var SCAN_LIB   = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+var SCAN_COOLDOWN_MS = 1500;
+var SCAN_BUILD = 'scan v4 · 30-Oct';   // shown in the scanner footer so the running version is obvious
+
+var SCANNED = {};                      // pid -> { uniqueKey: order }  rows added by the scanner
+var SCAN = { open:false, pid:'', h5:null, running:false, index:{}, until:0, seq:0,
+             cams:[], camIdx:-1, torch:false, await:'', lastAwait:'', starting:false,
+             libState:'', libCbs:[], last:'' };
+
+// ══════════════════════════════════════════════════════════════
+// SCANNER TAB (standalone mode)
+// The dashboard lives inside a Google frame, and on phones that frame is not
+// allowed to use the live camera — getUserMedia is refused even when the site
+// permission says Allow. So the live scanner runs as its OWN top-level tab:
+// this same page, opened with "#dspscan" in the URL, boots in scanner-only
+// mode (no gate, no grid, no google.script calls). The two tabs talk through
+// postMessage:
+//   dashboard -> scanner : init  { step, label, rows[] }      the keys to match
+//                          ack   { uk, ok, msg }              result of an item
+//                          pull  {}                           "resend everything"
+//   scanner -> dashboard : hello {}                            tab is ready
+//                          item  { uk, photo, thumb, name }    a scanned item
+//                          remove{ uk }
+// The scanner matches locally (instant feedback) and keeps its own batch, so a
+// dashboard tab that the phone has put to sleep catches up through pull/ack.
+// ══════════════════════════════════════════════════════════════
+var SCANNER_URL = (typeof SERVED_SCANNER_URL !== 'undefined' && SERVED_SCANNER_URL) ? SERVED_SCANNER_URL : '';
+var SA = { on: /(^|[#&])dspscan/.test(location.hash), rows:{}, batch:{}, seq:0, linked:false, step:'', label:'',
+           cap:'', capturing:false, win:null, origin:'', hello:null, unack:{} };
+
+function saPost(msg) {
+  try { if (window.opener && !window.opener.closed) { msg.t = 'dspscan'; window.opener.postMessage(msg, '*'); } } catch (e) {}
+}
+
+// Boot the scanner-only tab. Runs before the dashboard's own load handler,
+// which stands down when SA.on is set.
+if (SA.on) {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('standalone');
+    document.title = 'Dispatch FMS — Scanner';
+    if (ge('scBuild')) ge('scBuild').textContent = SCAN_BUILD + ' · scanner tab';
+    SCAN.open = true; SCAN.pid = 'sa';
+    ge('scOv').classList.remove('off');
+    ge('scLink').style.display = '';
+    ge('scHint').textContent = 'Scan the sticker → click the item picture → next. Every item goes straight to the dashboard tab; go back there to press Save.';
+    ge('scSaveBtn').style.display = 'none';
+    ge('scCloseBtn').textContent = 'Done — back to dashboard';
+    ge('scCloseBtn').onclick = saDone;
+    saSetLink('wait', 'Waiting for dashboard…');
+    scanRenderPending();
+    // Rows may travel in the URL as well (for a phone that sleeps the opener).
+    try {
+      var m = location.hash.match(/dspscan=([^&]+)/);
+      if (m) saInit(JSON.parse(decodeURIComponent(m[1])));
+    } catch (e) { /* no payload in the hash */ }
+    saPost({ type: 'hello' });
+    SA.hello = setInterval(function(){ if (!SA.linked) saPost({ type: 'hello' }); else clearInterval(SA.hello); }, 1500);
+    scanLib(function(ok) {
+      if (!ok) { scanMsg('Could not load the scanner library — check the connection.', true); return; }
+      scanStart();
+    });
+  });
+
+  window.addEventListener('message', function(e) {
+    var d = e.data;
+    if (!d || d.t !== 'dspscan') return;
+    if (d.type === 'init') { saInit(d); return; }
+    if (d.type === 'ack') {
+      var it = SA.batch[d.uk]; if (!it) return;
+      it.acked = true; it.ok = !!d.ok; it.msg = d.msg || '';
+      delete SA.unack[d.uk];
+      scanRenderPending();
+      return;
+    }
+    if (d.type === 'pull') { saResendAll(); return; }
+  });
+}
+
+function saSetLink(cls, text) {
+  var el = ge('scLink'); if (!el) return;
+  el.className = 'sc-link ' + cls; el.textContent = text;
+}
+
+function saInit(d) {
+  SA.rows = {};
+  (d.rows || []).forEach(function(r) { if (r && r.uk) SA.rows[String(r.uk).trim()] = r; });
+  SA.step = d.step || ''; SA.label = d.label || '';
+  SA.linked = true;
+  ge('scStep').textContent = SA.step + ' · ' + SA.label;
+  saSetLink('ok', 'Linked · ' + Object.keys(SA.rows).length + ' items on ' + SA.step);
+  // Rows already in the dashboard's batch (e.g. after a refresh of this tab).
+  (d.pending || []).forEach(function(uk) {
+    if (!SA.batch[uk] && SA.rows[uk]) SA.batch[uk] = { uk: uk, order: ++SA.seq, acked: true, ok: true, photo: '', thumb: '' };
+  });
+  saResendAll();
+  scanRenderPending();
+}
+
+function saResendAll() {
+  Object.keys(SA.batch).forEach(function(uk) {
+    var it = SA.batch[uk];
+    if (it.sent && it.acked) return;
+    saSend(uk);
+  });
+}
+
+function saSend(uk) {
+  var it = SA.batch[uk]; if (!it) return;
+  it.sent = true; SA.unack[uk] = 1;
+  saPost({ type: 'item', uk: uk, photo: it.photo || '', thumb: it.thumb || '', name: it.name || '' });
+}
+
+// A scan in the scanner tab: match against the rows the dashboard sent.
+function saHandle(text) {
+  var key = scanKeyFrom(text);
+  if (!key) return;
+  if (!SA.linked && !Object.keys(SA.rows).length) {
+    scanFlash('bad'); scanBeep('bad');
+    toast('Not linked to the dashboard yet — keep the dashboard tab open', 'err');
+    return;
+  }
+  var row = SA.rows[key];
+  if (!row) { scanFlash('bad'); scanBeep('bad'); toast('Not in this step', 'err'); return; }
+  if (SA.batch[key] && SA.batch[key].photo) { scanBeep('soft'); toast('Already scanned', 'inf'); return; }
+  if (!SA.batch[key]) SA.batch[key] = { uk: key, order: ++SA.seq, acked: false, ok: null, photo: '', thumb: '' };
+  SCAN.last = key;
+  scanFlash('ok'); scanBeep('ok');
+  try { if (navigator.vibrate) navigator.vibrate(80); } catch (e) {}
+  scanRenderPending();
+  saAskPhoto(key);
+}
+
+// After a match the live camera stays on and simply waits for one tap.
+function saAskPhoto(uk) {
+  SA.cap = uk; SA.capturing = true;
+  ge('scCapKey').textContent = uk;
+  ge('scFrame').classList.add('capturing');
+  scanMsg('Click the item picture.');
+  if (!SCAN.running) {
+    // Live camera not available in this tab either — fall back to the phone camera app.
+    var inp = ge('scCam'); SCAN.await = uk; SCAN.lastAwait = uk; inp.value = ''; try { inp.click(); } catch (e) {}
+  }
+}
+
+// Grab one frame from the running video, shrink it, attach it, send it.
+function saCapture() {
+  var uk = SA.cap; if (!uk) return;
+  var video = document.querySelector('#scReader video');
+  if (!video || !video.videoWidth) { toast('Camera not ready — try again', 'err'); return; }
+  var max = 1024, w = video.videoWidth, h = video.videoHeight;
+  if (w > max || h > max) { var s = Math.min(max / w, max / h); w = Math.round(w * s); h = Math.round(h * s); }
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  c.getContext('2d').drawImage(video, 0, 0, w, h);
+  var full = c.toDataURL('image/jpeg', 0.6);
+  var t = document.createElement('canvas'); t.width = 80; t.height = 80;
+  t.getContext('2d').drawImage(video, 0, 0, 80, 80);
+  saAttachPhoto(uk, full, t.toDataURL('image/jpeg', 0.6), 'scan_' + Date.now() + '.jpg');
+}
+
+function saAttachPhoto(uk, full, thumb, name) {
+  var it = SA.batch[uk]; if (!it) return;
+  it.photo = full; it.thumb = thumb; it.name = name; it.acked = false;
+  saSend(uk);
+  saEndCapture();
+  scanFlash('ok'); scanBeep('ok');
+  toast('Sent to the dashboard ✓', 'ok');
+  scanRenderPending();
+}
+
+function saSkipPhoto() {
+  var uk = SA.cap;
+  saEndCapture();
+  if (uk) { saSend(uk); toast('Added without photo — tap its 📷 in the list to take it', 'inf'); }
+  scanRenderPending();
+}
+
+function saEndCapture() {
+  SA.cap = ''; SA.capturing = false;
+  ge('scFrame').classList.remove('capturing');
+  SCAN.until = Date.now() + SCAN_COOLDOWN_MS;
+  scanMsg('Scanning… next item.');
+}
+
+function saRemove(uk) {
+  delete SA.batch[uk]; delete SA.unack[uk];
+  saPost({ type: 'remove', uk: uk });
+  scanRenderPending();
+}
+
+function saDone() {
+  saResendAll();
+  var n = Object.keys(SA.batch).length;
+  ge('scDoneBox') && (ge('scDoneBox').style.display = 'none');
+  try { window.close(); } catch (e) {}
+  // If the browser refuses to close a tab it did not open, say what to do.
+  setTimeout(function() {
+    if (!window.closed) toast(n + ' item(s) are in the dashboard — switch to the dashboard tab and press Save', 'inf');
+  }, 400);
+}
+
+// ── DASHBOARD SIDE of the link ────────────────────────────────
+var SCANWIN = { win:null, pid:'', timer:null, linked:false };
+
+function scanRowsPayload(pid) {
+  return P[pid].data.map(function(r) {
+    return { uk: r.uniqueKey, so: r.so, itemCode: r.itemCode, itemName: r.itemName, qty: r.qty,
+             size: r.size, make: r.make, model: r.model, curLocation: r.curLocation };
+  });
+}
+
+function scanInitPayload(pid) {
+  return { t:'dspscan', type:'init', step: PCFG[pid].step, label: STEPLBL[pid] || '',
+           rows: scanRowsPayload(pid), pending: Object.keys(SCANNED[pid] || {}) };
+}
+
+// Opens the scanner tab. The same page in scanner mode by default, or the
+// hosted copy named in SCANNER_URL. The rows travel in the URL as well, so a
+// phone that sleeps this tab still has them.
+function scanOpenTab(pid) {
+  if (!SCANNED[pid]) SCANNED[pid] = {};
+  var base = SCANNER_URL || location.href.split('#')[0];
+  var payload = scanInitPayload(pid);
+  var url = base + '#dspscan';
+  try {
+    var enc = encodeURIComponent(JSON.stringify(payload));
+    if (enc.length < 60000) url = base + '#dspscan=' + enc;      // keep the URL sane
+  } catch (e) {}
+  var w = null;
+  try { w = window.open(url, 'dsp_scanner'); } catch (e) { w = null; }
+  if (!w) { toast('The browser blocked the scanner tab — allow pop-ups for this site and try again', 'err'); return false; }
+  SCANWIN.win = w; SCANWIN.pid = pid; SCANWIN.linked = false;
+  try { w.focus(); } catch (e) {}
+  toast('Scanner opened in a new tab — scan there, then come back here to Save', 'inf');
+  return true;
+}
+
+window.addEventListener('message', function(e) {
+  if (SA.on) return;                          // the scanner tab handles its own
+  var d = e.data;
+  if (!d || d.t !== 'dspscan') return;
+  var pid = SCANWIN.pid; if (!pid || !P[pid]) return;
+  var src = e.source || SCANWIN.win;
+  if (d.type === 'hello') {
+    SCANWIN.linked = true;
+    try { src.postMessage(scanInitPayload(pid), '*'); } catch (err) {}
+    return;
+  }
+  if (d.type === 'item') {
+    var uk = String(d.uk || '').trim(), row = null;
+    P[pid].data.forEach(function(r) { if (r.uniqueKey === uk) row = r; });
+    if (!row) { try { src.postMessage({ t:'dspscan', type:'ack', uk: uk, ok: false, msg: 'Not in this step' }, '*'); } catch (err) {} return; }
+    if (!SCANNED[pid]) SCANNED[pid] = {};
+    if (!SCANNED[pid][uk]) SCANNED[pid][uk] = ++SCAN.seq;
+    if (d.photo) {
+      var tok = 'P' + (++PSEQ);
+      PEND[tok] = { full: d.photo, name: d.name || 'scan.jpg' };
+      setEv(pid, uk, 'photo', { token: tok, thumb: d.thumb || '', name: d.name || 'scan.jpg' });
+    }
+    rnd(pid); unsaved(pid); updStats(pid);
+    if (SCAN.open && SCAN.pid === pid) scanRenderPending();
+    try { src.postMessage({ t:'dspscan', type:'ack', uk: uk, ok: true, msg: d.photo ? 'Ready to save' : 'Photo needed' }, '*'); } catch (err) {}
+    return;
+  }
+  if (d.type === 'remove') {
+    var k = String(d.uk || '').trim();
+    if (SCANNED[pid]) delete SCANNED[pid][k];
+    setEv(pid, k, 'photo', '');
+    rnd(pid); updStats(pid);
+    return;
+  }
+});
+
+// When the dashboard tab wakes up again, ask the scanner for anything missed.
+document.addEventListener('visibilitychange', function() {
+  if (SA.on || document.visibilityState !== 'visible') return;
+  var w = SCANWIN.win;
+  if (w && !w.closed) { try { w.postMessage({ t:'dspscan', type:'pull' }, '*'); } catch (e) {} }
+});
+
+function scanEnabled(pid) {
+  var cfg = PCFG[pid];
+  return !!(cfg && SCAN_STEPS.indexOf(cfg.step) !== -1);
+}
+function scanIsPending(pid, uk) { return !!(SCANNED[pid] && SCANNED[pid][uk]); }
+function scanCount(pid) { return Object.keys(SCANNED[pid] || {}).length; }
+function scanForget(pid, keysObj) {
+  if (!SCANNED[pid]) return;
+  if (!keysObj) { SCANNED[pid] = {}; return; }
+  for (var k in keysObj) delete SCANNED[pid][k];
+}
+
+// Keep the scanned marks honest when the grid is reloaded, cleared or saved.
+// Wrapping (not editing) the three originals — they run exactly as before.
+var _scan_onData = onData;
+onData = function(r) { SCANNED = {}; _scan_onData(r); };
+var _scan_clr = clr;
+clr = function(pid) { scanForget(pid); _scan_clr(pid); if (SCAN.open && SCAN.pid === pid) scanRenderPending(); };
+var _scan_dropSavedRows = dropSavedRows;
+dropSavedRows = function(pid, savedKeys) {
+  scanForget(pid, savedKeys);
+  _scan_dropSavedRows(pid, savedKeys);
+  if (SCAN.open && SCAN.pid === pid) { scanBuildIndex(); scanRenderPending(); }
+};
+
+// ── COMMON SCAN BUTTON (top bar) ──────────────────────────────
+// Works from any screen. Scans against the step you are on; if that step is
+// not scan-enabled it jumps to the first enabled step (STEP8) first, so the
+// doer never has to hunt for the right tab before scanning.
+function scanOpenCommon() {
+  if (!requireUser()) return;
+  if (!DATA_LOADED) { toast('Still loading — try again in a moment', 'inf'); return; }
+  var pid = activePanel();
+  if (!scanEnabled(pid)) {
+    var enabled = DATA_TABS.filter(scanEnabled);
+    if (!enabled.length) { toast('Scanning is not enabled on any step', 'err'); return; }
+    // Prefer an enabled step that actually has rows to scan.
+    var target = enabled.filter(function(p){ return P[p].data.length > 0; })[0] || enabled[0];
+    // Make sure that step is reachable in the strip even if it is currently empty.
+    goStep(target);
+    pid = target;
+    toast('Scanning for ' + PCFG[pid].step + ' · ' + (STEPLBL[pid] || ''), 'inf');
+  }
+  scanOpen(pid);
+}
+
+// ── OPEN / CLOSE ──────────────────────────────────────────────
+function scanOpen(pid) {
+  if (ge('scBuild')) ge('scBuild').textContent = SCAN_BUILD;
+  if (!requireUser()) return;
+  if (!scanEnabled(pid)) return;
+  cfdClose(); soCloseAll();
+  // Inside a frame that forbids the camera (every phone so far), or when a
+  // hosted scanner is configured, the live scanner runs in its own tab.
+  if (SCANNER_URL || scanFrameAllowsCamera() === false || SCAN.noLive) {
+    if (!SCANNED[pid]) SCANNED[pid] = {};
+    if (scanOpenTab(pid)) return;
+    // pop-up blocked: fall through to the in-page scanner (photo scan still works)
+  }
+  SCAN.open = true; SCAN.pid = pid; SCAN.until = 0; SCAN.await = ''; SCAN.last = '';
+  SCAN.noLive = false; SCAN.liveFails = 0; scanPermHide();
+  ge('scFrame').classList.remove('paused');
+  if (!SCANNED[pid]) SCANNED[pid] = {};
+  scanBuildIndex();
+  ge('scStep').textContent = PCFG[pid].step + ' · ' + (STEPLBL[pid] || '');
+  ge('scOv').classList.remove('off');
+  scanMsg('Point the camera at the QR sticker.');
+  scanRenderPending();
+  scanLib(function(ok) {
+    if (!ok) { scanMsg('Could not load the scanner library — check the connection. You can still type a key below.', true); return; }
+    scanStart();
+  });
+}
+
+function scanClose() {
+  if (SA.on) { saDone(); return; }
+  if (!SCAN.open) return;
+  var pid = SCAN.pid;
+  SCAN.open = false; SCAN.await = '';
+  scanStop(function() { ge('scOv').classList.add('off'); });
+  ge('scOv').classList.add('off');
+  if (pid) { rnd(pid); updStats(pid); }
+}
+
+// Close with Save: the scanner shuts and the EXISTING save runs, unchanged.
+function scanSave() {
+  var pid = SCAN.pid;
+  scanClose();
+  if (pid) setTimeout(function(){ save(pid); }, 60);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && SCAN.open) { e.preventDefault(); scanClose(); }
+});
+
+// ── LIBRARY (loaded once, on first use) ───────────────────────
+function scanLib(cb) {
+  if (window.Html5Qrcode) { cb(true); return; }
+  SCAN.libCbs.push(cb);
+  if (SCAN.libState === 'loading') return;
+  SCAN.libState = 'loading';
+  scanMsg('Loading scanner…');
+  var s = document.createElement('script');
+  s.src = SCAN_LIB; s.async = true;
+  s.onload  = function() { SCAN.libState = 'ok';   var c = SCAN.libCbs; SCAN.libCbs = []; c.forEach(function(f){ f(true); }); };
+  s.onerror = function() { SCAN.libState = '';     var c = SCAN.libCbs; SCAN.libCbs = []; c.forEach(function(f){ f(false); }); };
+  document.head.appendChild(s);
+}
+
+// ── CAMERA ────────────────────────────────────────────────────
+function scanQrBox(w, h) { var s = Math.floor(Math.min(w, h) * 0.72); return { width: s, height: s }; }
+
+function scanStart() {
+  if (!SCAN.open || SCAN.running || SCAN.starting || !window.Html5Qrcode) return;
+  SCAN.starting = true;
+  ge('scFrame').classList.remove('paused');
+  try {
+    if (!SCAN.h5) {
+      var opts = { verbose: false };
+      if (window.Html5QrcodeSupportedFormats) opts.formatsToSupport = [Html5QrcodeSupportedFormats.QR_CODE];
+      SCAN.h5 = new Html5Qrcode('scReader', opts);
+    }
+  } catch (e) { SCAN.starting = false; scanMsg('Scanner could not initialise: ' + (e.message || e), true); return; }
+
+  var source = (SCAN.camIdx >= 0 && SCAN.cams[SCAN.camIdx]) ? SCAN.cams[SCAN.camIdx].id : { facingMode: 'environment' };
+  var cfg = { fps: 10, qrbox: scanQrBox, aspectRatio: 1.0, disableFlip: false };
+  ge('scTorch').disabled = true;
+  SCAN.h5.start(source, cfg, scanOnDecode, function(){ /* no code in frame — normal */ })
+    .then(function() {
+      SCAN.starting = false;
+      if (!SCAN.open) { SCAN.running = true; scanStop(); return; }   // closed while starting
+      SCAN.running = true;
+      SCAN.liveFails = 0; scanPermHide();
+      scanMsg(scanCount(SCAN.pid) ? 'Scanning… next item.' : 'Scanning… hold the sticker inside the box.');
+      scanProbeCameras();
+      scanProbeTorch();
+    })
+    .catch(function(err) {
+      SCAN.starting = false;
+      SCAN.running = false;
+      var m = String(err && err.message || err || '');
+      ge('scFrame').classList.add('paused');
+      if (/NotAllowed|Permission|denied|not allowed/i.test(m)) {
+        scanMsg('Live camera was refused.', true);
+        scanPermHelp('denied', m);
+      } else if (/NotFound|no camera|Requested device not found|NotReadable|could not start video/i.test(m)) {
+        scanMsg('The camera could not be opened (' + m + ').', true);
+        scanPermHelp('nocam', m);
+      } else {
+        scanMsg('Camera could not start: ' + m, true);
+        scanPermHelp('other', m);
+      }
+    });
+}
+
+// ── PERMISSION HELP ───────────────────────────────────────────
+// "Refused" can mean two different things, and the fix is different:
+//   1. The person really did deny it (or the browser remembers a denial) —
+//      the site setting has to be changed, so the steps for their device are
+//      shown, with Try again.
+//   2. The app is inside a Google frame that is not allowed to use the live
+//      camera at all. Then no setting helps, and the only working route is
+//      Photo scan (the phone camera app, which always works). The frame's own
+//      permissions policy says which case this is.
+function scanFrameAllowsCamera() {
+  try {
+    var fp = document.featurePolicy || document.permissionsPolicy;
+    if (fp && typeof fp.allowsFeature === 'function') return fp.allowsFeature('camera');
+  } catch (e) { /* unknown */ }
+  return null;   // cannot tell
+}
+
+function scanDevice() {
+  var ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+  if (/Android/i.test(ua)) return 'android';
+  return 'desktop';
+}
+
+function scanPermHelp(kind, detail) {
+  var box = ge('scPerm'); if (!box) return;
+  var allowed = scanFrameAllowsCamera(), dev = scanDevice(), h = '';
+  box.classList.remove('blocked');
+  SCAN.liveFails = (SCAN.liveFails || 0) + 1;
+  // A frame that forbids the camera, or two refusals in a row, means the live
+  // camera is not going to work on this device: stop retrying automatically.
+  if ((kind === 'denied' && allowed === false) || SCAN.liveFails >= 2) SCAN.noLive = true;
+
+  if (kind === 'denied' && allowed === false) {
+    box.classList.add('blocked');
+    h += '<h4>🚫 Live camera is blocked inside this page</h4>' +
+         'This dashboard runs inside a Google frame that is not allowed to use the live camera on this device — ' +
+         'the site permission is already <b>Allow</b>, so changing settings will not help.<br>' +
+         'Use <b>📸 Photo scan</b>: it opens the phone camera, you photograph the sticker, and the QR is read from the picture. ' +
+         'Everything after that (item photo, save) is the same.';
+    h += '<div class="sc-ctl">' + (SA.on ? '' : '<button class="sc-btn y" onclick="scanToTab()">📷 Open live scanner in a new tab</button>') +
+         '<button class="sc-btn" onclick="scanSnap()">📸 Photo scan</button>' +
+         '<button class="sc-btn" onclick="scanRetryLive()">🔄 Try live camera again</button></div>';
+  } else if (kind === 'denied') {
+    h += '<h4>🔒 Allow the camera for this site</h4>';
+    if (dev === 'android') {
+      h += '<ol><li>Tap the <b>lock icon</b> (or ⓘ) at the left of the address bar.</li>' +
+           '<li>Tap <b>Permissions</b> → <b>Camera</b> → <b>Allow</b>.</li>' +
+           '<li>Come back here and press <b>Try again</b>.</li></ol>' +
+           'If Camera is not listed there: Chrome ⋮ → <b>Settings</b> → <b>Site settings</b> → <b>Camera</b> → make sure it is on and <b>script.google.com</b> is not under Blocked.';
+    } else if (dev === 'ios') {
+      h += '<ol><li>Tap <b>AA</b> (or ⓘ) in the address bar → <b>Website Settings</b> → <b>Camera</b> → <b>Allow</b>.</li>' +
+           '<li>If that is already Allow: iPhone <b>Settings</b> → <b>Safari</b> → <b>Camera</b> → <b>Allow</b> (and <b>Settings</b> → <b>Privacy &amp; Security</b> → <b>Camera</b> → Safari on).</li>' +
+           '<li>Come back here and press <b>Try again</b>.</li></ol>' +
+           'Chrome on iPhone: <b>Settings</b> → <b>Chrome</b> → <b>Camera</b> → on.';
+    } else {
+      h += '<ol><li>Click the <b>camera / lock icon</b> in the address bar.</li>' +
+           '<li>Set <b>Camera</b> to <b>Allow</b> for this site.</li>' +
+           '<li>Press <b>Try again</b>.</li></ol>';
+    }
+    h += 'Still refused after that? Then this frame does not allow the live camera on your device — use <b>📸 Photo scan</b> instead; it always works.';
+    h += '<div class="sc-ctl"><button class="sc-btn y" onclick="scanRetryLive()">🔄 Try again</button>' +
+         (SA.on ? '' : '<button class="sc-btn" onclick="scanToTab()">📷 Live scanner in a new tab</button>') +
+         '<button class="sc-btn" onclick="scanSnap()">📸 Photo scan</button></div>';
+  } else if (kind === 'nocam') {
+    h += '<h4>📷 Camera not available</h4>' +
+         'No usable camera was found, or another app is holding it. Close other camera apps and press Try again, ' +
+         'or use <b>📸 Photo scan</b> / type the key below.' +
+         '<div class="sc-ctl"><button class="sc-btn y" onclick="scanRetryLive()">🔄 Try again</button>' +
+         '<button class="sc-btn" onclick="scanSnap()">📸 Photo scan</button></div>';
+  } else {
+    h += '<h4>⚠️ Camera could not start</h4>' + xe(detail || '') +
+         '<div class="sc-ctl"><button class="sc-btn y" onclick="scanRetryLive()">🔄 Try again</button>' +
+         '<button class="sc-btn" onclick="scanSnap()">📸 Photo scan</button></div>';
+  }
+  box.innerHTML = h;
+  box.classList.add('on');
+}
+
+function scanPermHide() { var b = ge('scPerm'); if (b) { b.classList.remove('on'); b.innerHTML = ''; } }
+
+// ── PHOTO SCAN (fallback that works everywhere) ───────────────
+// Opens the phone's own camera app through a capture input — exactly how the
+// grid's "Click Picture" already works — and decodes the QR from the picture.
+function scanSnap() {
+  if (!SCAN.open) return;
+  var inp = ge('scSnap'); if (!inp) return;
+  inp.value = '';
+  // Release the live camera first so the camera app can open on iOS.
+  if (SCAN.running) scanStop(function(){ ge('scFrame').classList.add('paused'); try { inp.click(); } catch (e) {} });
+  else { try { inp.click(); } catch (e) {} }
+}
+
+function scanSnapPicked(inp) {
+  var file = inp.files && inp.files[0];
+  inp.value = '';
+  if (!file) return;
+  scanMsg('Reading the QR from the photo…');
+  scanLib(function(ok) {
+    if (!ok) { scanMsg('Scanner library not loaded — type the key below.', true); return; }
+    try {
+      if (!SCAN.h5file) SCAN.h5file = new Html5Qrcode('scSnapHost', { verbose: false });
+    } catch (e) { scanMsg('Could not start the decoder: ' + (e.message || e), true); return; }
+    // A 12-megapixel phone photo defeats the decoder; a resized copy reads
+    // reliably. Try a medium copy first, then a larger one, then the original.
+    var sizes = [1200, 2000, 0], i = 0;
+    function attempt() {
+      if (i >= sizes.length) {
+        scanFlash('bad'); scanBeep('bad');
+        scanMsg('No QR code could be read in that photo — fill the frame with the sticker, keep it flat and well lit, then try again.', true);
+        return;
+      }
+      var max = sizes[i++];
+      var go = function(blobOrFile) {
+        SCAN.h5file.scanFile(blobOrFile, false)
+          .then(function(text) { scanMsg(''); scanHandle(text); })
+          .catch(function() { attempt(); });
+      };
+      if (!max) { go(file); return; }
+      scanResizeToBlob(file, max, function(blob) { if (blob) go(blob); else attempt(); });
+    }
+    attempt();
+  });
+}
+
+// Resize an image file to fit `max` px on its long side and hand back a JPEG
+// File (the decoder wants a File/Blob, not a data URL).
+function scanResizeToBlob(file, max, cb) {
+  var fr = new FileReader();
+  fr.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      if (w > max || h > max) { var s = Math.min(max / w, max / h); w = Math.round(w * s); h = Math.round(h * s); }
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+      try {
+        c.toBlob(function(b) {
+          if (!b) { cb(null); return; }
+          try { cb(new File([b], 'scan.jpg', { type: 'image/jpeg' })); } catch (e2) { cb(b); }
+        }, 'image/jpeg', 0.9);
+      } catch (e) { cb(null); }
+    };
+    img.onerror = function() { cb(null); };
+    img.src = e.target.result;
+  };
+  fr.onerror = function() { cb(null); };
+  fr.readAsDataURL(file);
+}
+
+function scanStop(cb) {
+  var h = SCAN.h5;
+  if (!h || !SCAN.running) { SCAN.running = false; if (cb) cb(); return; }
+  SCAN.running = false;
+  try {
+    h.stop().then(function(){ try { h.clear(); } catch (e) {} if (cb) cb(); })
+            .catch(function(){ if (cb) cb(); });
+  } catch (e) { if (cb) cb(); }
+}
+
+function scanProbeCameras() {
+  if (SCAN.cams.length) { ge('scSwitch').disabled = SCAN.cams.length < 2; return; }
+  try {
+    Html5Qrcode.getCameras().then(function(list) {
+      SCAN.cams = list || [];
+      ge('scSwitch').disabled = SCAN.cams.length < 2;
+    }).catch(function(){ ge('scSwitch').disabled = true; });
+  } catch (e) { ge('scSwitch').disabled = true; }
+}
+
+function scanSwitchCamera() {
+  if (!SCAN.cams.length) return;
+  // First switch from the default rear camera: jump to a camera that is NOT
+  // the one already in use, i.e. prefer a front-facing label if there is one.
+  if (SCAN.camIdx < 0) {
+    var front = -1;
+    for (var i = 0; i < SCAN.cams.length; i++) if (/front|user|face/i.test(SCAN.cams[i].label || '')) { front = i; break; }
+    SCAN.camIdx = front >= 0 ? front : 0;
+  } else SCAN.camIdx = (SCAN.camIdx + 1) % SCAN.cams.length;
+  SCAN.torch = false;
+  scanStop(function(){ scanStart(); });
+}
+
+function scanProbeTorch() {
+  var btn = ge('scTorch'); btn.disabled = true; btn.textContent = '🔦 Torch';
+  try {
+    var caps = SCAN.h5.getRunningTrackCapabilities && SCAN.h5.getRunningTrackCapabilities();
+    if (caps && caps.torch) btn.disabled = false;
+  } catch (e) { /* torch not supported here */ }
+}
+
+function scanToggleTorch() {
+  if (!SCAN.h5 || !SCAN.running) return;
+  var want = !SCAN.torch;
+  try {
+    SCAN.h5.applyVideoConstraints({ advanced: [{ torch: want }] })
+      .then(function(){ SCAN.torch = want; ge('scTorch').textContent = want ? '🔦 Torch on' : '🔦 Torch'; })
+      .catch(function(){ toast('Torch is not available on this camera', 'inf'); });
+  } catch (e) { toast('Torch is not available on this camera', 'inf'); }
+}
+
+// ── MATCHING ──────────────────────────────────────────────────
+// key -> row, built from the rows loaded on this step. Exact match on the
+// complete Unique Key (edges trimmed) — the only rule.
+function scanBuildIndex() {
+  var pid = SCAN.pid, idx = {};
+  (P[pid] ? P[pid].data : []).forEach(function(r) { idx[String(r.uniqueKey || '').trim()] = r; });
+  SCAN.index = idx;
+}
+
+// The QR holds <webapp>/exec?key=<encoded key>. Anything without a key
+// parameter is treated as the raw key itself.
+function scanKeyFrom(text) {
+  var t = String(text || '').trim();
+  if (!t) return '';
+  var m = t.match(/[?&#]key=([^&#]*)/i);
+  if (m) { try { return decodeURIComponent(m[1].replace(/\+/g, '%20')).trim(); } catch (e) { return m[1].trim(); } }
+  return t;
+}
+
+function scanOnDecode(text) {
+  if (SA.capturing) return;                     // waiting for the item picture
+  var now = Date.now();
+  if (now < SCAN.until) return;                 // cooldown — one sticker, one read
+  SCAN.until = now + SCAN_COOLDOWN_MS;
+  scanHandle(text);
+}
+
+function scanHandle(text) {
+  if (SA.on) return saHandle(text);
+  var pid = SCAN.pid, key = scanKeyFrom(text);
+  if (!key) return;
+  var row = SCAN.index[key];
+  if (!row) {
+    scanFlash('bad'); scanBeep('bad');
+    toast('Not in this step', 'err');
+    return;
+  }
+  var uk = row.uniqueKey;
+  if (scanIsPending(pid, uk)) {
+    scanBeep('soft');
+    toast('Already scanned', 'inf');
+    return;
+  }
+  SCANNED[pid][uk] = ++SCAN.seq;
+  SCAN.last = uk;
+  scanFlash('ok'); scanBeep('ok');
+  try { if (navigator.vibrate) navigator.vibrate(80); } catch (e) {}
+  scanRenderPending();
+  ge('scCnt').textContent = 'Scanned: ' + scanCount(pid);
+  rnd(pid); unsaved(pid);
+  // The step's fill is the photo — open the camera for this item now.
+  if (scanNeedsPhoto(pid)) scanAskPhoto(uk);
+}
+
+function scanManual() {
+  var inp = ge('scKey'), v = inp.value.trim();
+  if (!v) return;
+  inp.value = '';
+  scanHandle(v);
+}
+
+// ── PHOTO AFTER SCAN ──────────────────────────────────────────
+function scanNeedsPhoto(pid) {
+  return (P[pid].cfg.edits || []).some(function(f){ return COL[f] && COL[f].edit === 'photo'; });
+}
+
+// The camera stream is stopped before the phone's camera app is opened — the
+// two cannot share the camera on iOS, and a frozen preview is what you get if
+// they try. It restarts the moment the picture (or a cancel) comes back.
+function scanAskPhoto(uk) {
+  SCAN.await = uk; SCAN.lastAwait = uk;
+  scanMsg('Click the picture of this item…');
+  scanStop(function() {
+    ge('scFrame').classList.add('paused');
+    var cam = ge('scCam'); cam.value = '';
+    try { cam.click(); } catch (e) {}
+  });
+}
+
+function scanPhotoPicked(inp) {
+  var file = inp.files && inp.files[0];
+  inp.value = '';
+  // lastAwait survives a stray focus event, so a picture that arrives a moment
+  // late still lands on the right item instead of being dropped.
+  var uk = SCAN.await || SCAN.lastAwait, pid = SCAN.pid;
+  SCAN.await = ''; SCAN.lastAwait = '';
+  if (!file || !uk) { scanResume(); return; }
+  if (SA.on) {
+    shrinkImage(file, function(full, thumb) {
+      if (!full) { toast('Could not read that image', 'err'); scanResume(); return; }
+      saAttachPhoto(uk, full, thumb, file.name);
+      scanResume();
+    });
+    return;
+  }
+  if (file.size > 25 * 1024 * 1024) { toast('That image is over 25 MB — take it again', 'err'); scanResume(); return; }
+  shrinkImage(file, function(full, thumb) {
+    if (!full) { toast('Could not read that image', 'err'); scanResume(); return; }
+    var tok = 'P' + (++PSEQ);
+    PEND[tok] = { full: full, name: file.name };
+    setEv(pid, uk, 'photo', { token: tok, thumb: thumb, name: file.name });
+    rnd(pid); unsaved(pid); updStats(pid);
+    scanRenderPending();
+    toast('Photo captured — row is ready to save', 'ok');
+    scanResume();
+  });
+}
+
+function scanPhotoCancelled() {
+  if (!SCAN.open || !SCAN.await) return;
+  SCAN.await = ''; SCAN.lastAwait = '';
+  scanResume();
+  toast('No photo taken — tap the 📷 on the item to take it later', 'inf');
+}
+
+function scanResume() {
+  if (!SCAN.open) return;
+  // Live camera is known not to work here — do not keep re-asking after
+  // every photo; the person works through 📸 Photo scan instead.
+  if (SCAN.noLive) {
+    ge('scFrame').classList.add('paused');
+    scanMsg('Tap 📸 Photo scan for the next item.');
+    return;
+  }
+  SCAN.until = Date.now() + 600;          // ignore the frame still on screen
+  scanStart();
+}
+
+// The explicit "Try again" buttons: clear the no-live flag and try once more.
+function scanRetryLive() {
+  SCAN.noLive = false; SCAN.liveFails = 0;
+  scanPermHide();
+  scanResume();
+}
+
+// Some browsers fire neither change nor cancel when the camera is dismissed.
+// Coming back to the page with a photo still awaited means nothing was taken.
+window.addEventListener('focus', function() {
+  if (!SCAN.open || !SCAN.await) return;
+  setTimeout(function() { if (SCAN.open && SCAN.await && !SCAN.running) scanPhotoCancelled(); }, 900);
+});
+
+// ── PENDING LIST ──────────────────────────────────────────────
+function scanRenderPending() {
+  if (SA.on) return saRenderPending();
+  var pid = SCAN.pid, list = ge('scList');
+  if (!pid || !list) return;
+  var marks = SCANNED[pid] || {}, dmap = {};
+  P[pid].data.forEach(function(r){ dmap[r.uniqueKey] = r; });
+  var keysArr = Object.keys(marks).sort(function(a, b){ return marks[b] - marks[a]; });   // newest first
+
+  ge('scCnt').textContent = 'Scanned: ' + keysArr.length;
+  var ready = 0;
+  keysArr.forEach(function(uk){ if (rowMissingField(pid, uk) === '') ready++; });
+  ge('scSaveBtn').textContent = '💾 Save ' + ready + ' ready';
+  ge('scSaveBtn').disabled = ready === 0;
+
+  if (!keysArr.length) {
+    list.innerHTML = '<div class="sc-list-h">Pending in this batch <span>0</span></div><div class="sc-empty">Nothing scanned yet.</div>';
+    return;
+  }
+
+  // Group by SO, keeping each group's newest item at the top.
+  var groups = {}, order = [];
+  keysArr.forEach(function(uk) {
+    var r = dmap[uk]; if (!r) return;
+    var so = r.so || '(no SO)';
+    if (!groups[so]) { groups[so] = []; order.push(so); }
+    groups[so].push(r);
+  });
+
+  var h = '<div class="sc-list-h">Pending in this batch <span>' + keysArr.length + '</span></div>';
+  order.forEach(function(so) {
+    var rows = groups[so];
+    h += '<div class="sc-so">' + xe(so) + '<b>' + rows.length + '</b></div>';
+    rows.forEach(function(r) {
+      var uk = r.uniqueKey, ph = ev(pid, uk, 'photo'), has = !!(ph && (ph.token || ph.url));
+      var det = [];
+      if (r.itemCode) det.push('<i>' + xe(r.itemCode) + '</i>');
+      if (r.itemName) det.push(xe(r.itemName));
+      if (r.qty)      det.push('Qty ' + xe(r.qty));
+      if (r.size)     det.push(xe(r.size));
+      if (r.make || r.model) det.push(xe([r.make, r.model].filter(Boolean).join(' / ')));
+      if (r.curLocation) det.push('@ ' + xe(r.curLocation));
+      var thumb = has
+        ? '<div class="sc-ph" title="Retake" onclick="scanRetake(\'' + xe(uk) + '\')"><img src="' + xe(ph.thumb || '') + '"></div>'
+        : '<div class="sc-ph need" title="Take the photo" onclick="scanRetake(\'' + xe(uk) + '\')">📷</div>';
+      h += '<div class="sc-item' + (has ? '' : ' nophoto') + (uk === SCAN.last ? ' last' : '') + '">' + thumb +
+           '<div class="sc-it"><div class="sc-k">' + xe(uk) + '</div><div class="sc-d">' + det.join(' · ') + '</div>' +
+           '<div class="sc-st">' + (has ? '✓ Photo attached — ready to save' : '📷 Photo needed — tap the camera') + '</div></div>' +
+           '<button class="sc-rm" title="Remove from this batch" onclick="scanRemove(\'' + xe(uk) + '\')">✕</button></div>';
+    });
+  });
+  list.innerHTML = h;
+}
+
+function scanRetake(uk) {
+  if (!SCAN.open) return;
+  if (SCAN.running) scanAskPhoto(uk);
+  else { SCAN.await = uk; SCAN.lastAwait = uk; var cam = ge('scCam'); cam.value = ''; try { cam.click(); } catch (e) {} }
+}
+
+// Chrome fires "cancel" when the camera / file picker is dismissed.
+window.addEventListener('load', function() {
+  var c = ge('scCam'); if (c) c.addEventListener('cancel', scanPhotoCancelled);
+});
+
+function scanRemove(uk) {
+  var pid = SCAN.pid;
+  if (!SCANNED[pid]) return;
+  delete SCANNED[pid][uk];
+  setEv(pid, uk, 'photo', '');
+  if (SCAN.last === uk) SCAN.last = '';
+  rnd(pid); updStats(pid);
+  scanRenderPending();
+  toast('Removed from the batch', 'inf');
+}
+
+// From the in-page scanner: move to the scanner tab instead.
+function scanToTab() {
+  var pid = SCAN.pid;
+  scanClose();
+  if (pid) scanOpenTab(pid);
+}
+
+// Pending list inside the scanner tab — its own batch, with the dashboard's
+// answer for each item.
+function saRenderPending() {
+  var list = ge('scList'); if (!list) return;
+  var keysArr = Object.keys(SA.batch).sort(function(a, b){ return SA.batch[b].order - SA.batch[a].order; });
+  ge('scCnt').textContent = 'Scanned: ' + keysArr.length;
+  if (!keysArr.length) {
+    list.innerHTML = '<div class="sc-list-h">This batch <span>0</span></div><div class="sc-empty">Nothing scanned yet. Point the camera at a sticker.</div>';
+    return;
+  }
+  var groups = {}, order = [];
+  keysArr.forEach(function(uk) {
+    var r = SA.rows[uk] || { uk: uk, so: '(unknown)' }, so = r.so || '(no SO)';
+    if (!groups[so]) { groups[so] = []; order.push(so); }
+    groups[so].push(r);
+  });
+  var h = '<div class="sc-list-h">This batch <span>' + keysArr.length + '</span></div>';
+  order.forEach(function(so) {
+    var rows = groups[so];
+    h += '<div class="sc-so">' + xe(so) + '<b>' + rows.length + '</b></div>';
+    rows.forEach(function(r) {
+      var uk = r.uk, it = SA.batch[uk], has = !!it.photo;
+      var det = [];
+      if (r.itemCode) det.push('<i>' + xe(r.itemCode) + '</i>');
+      if (r.itemName) det.push(xe(r.itemName));
+      if (r.qty)      det.push('Qty ' + xe(r.qty));
+      if (r.size)     det.push(xe(r.size));
+      if (r.make || r.model) det.push(xe([r.make, r.model].filter(Boolean).join(' / ')));
+      if (r.curLocation) det.push('@ ' + xe(r.curLocation));
+      var st = !has ? '📷 Photo needed — tap the camera'
+             : it.acked ? (it.ok ? '✓ In the dashboard — ready to save' : '✗ ' + xe(it.msg))
+             : '⏳ Sending to the dashboard…';
+      var thumb = has
+        ? '<div class="sc-ph" title="Retake" onclick="saAskPhoto(\'' + xe(uk) + '\')"><img src="' + xe(it.thumb || '') + '"></div>'
+        : '<div class="sc-ph need" title="Take the photo" onclick="saAskPhoto(\'' + xe(uk) + '\')">📷</div>';
+      h += '<div class="sc-item' + (has ? '' : ' nophoto') + (uk === SCAN.last ? ' last' : '') + '">' + thumb +
+           '<div class="sc-it"><div class="sc-k">' + xe(uk) + '</div><div class="sc-d">' + det.join(' · ') + '</div>' +
+           '<div class="sc-st">' + st + '</div></div>' +
+           '<button class="sc-rm" title="Remove from this batch" onclick="saRemove(\'' + xe(uk) + '\')">✕</button></div>';
+    });
+  });
+  list.innerHTML = h;
+}
+
+// ── FEEDBACK: flash, beep, message ────────────────────────────
+function scanFlash(kind) {
+  var f = ge('scFrame');
+  f.classList.remove('ok', 'bad'); void f.offsetWidth;
+  f.classList.add(kind);
+  setTimeout(function(){ f.classList.remove(kind); }, 450);
+}
+
+var _scanAC = null;
+function scanBeep(kind) {
+  try {
+    if (!_scanAC) _scanAC = new (window.AudioContext || window.webkitAudioContext)();
+    if (_scanAC.state === 'suspended') _scanAC.resume();
+    var plan = kind === 'ok'   ? [[880, 0, .12]]
+             : kind === 'bad'  ? [[220, 0, .14], [220, .18, .14]]
+             :                   [[440, 0, .06]];
+    plan.forEach(function(p) {
+      var o = _scanAC.createOscillator(), g = _scanAC.createGain();
+      o.type = 'sine'; o.frequency.value = p[0];
+      g.gain.value = kind === 'soft' ? 0.08 : 0.18;
+      o.connect(g); g.connect(_scanAC.destination);
+      var t = _scanAC.currentTime + p[1];
+      o.start(t); o.stop(t + p[2]);
+    });
+  } catch (e) { /* no audio — the flash and toast still tell the story */ }
+}
+
+function scanMsg(t, isErr) {
+  var m = ge('scMsg'); if (!m) return;
+  m.textContent = t || '';
+  m.classList.toggle('err', !!isErr);
+}
+</script>
+
+<!-- ── QR SCANNER OVERLAY ─────────────────────────────────────── -->
+<div id="scOv" class="off">
+  <div class="sc-card">
+    <div class="sc-top">
+      <div class="sc-title">📷 <b>Scan</b> items</div>
+      <div class="sc-step" id="scStep">—</div>
+      <div class="sc-cnt" id="scCnt">Scanned: 0</div>
+      <span class="sc-link" id="scLink" style="display:none">—</span>
+      <button class="sc-x" title="Close (Esc)" onclick="scanClose()">✕</button>
+    </div>
+    <div class="sc-body">
+      <div class="sc-cam">
+        <div class="sc-frame" id="scFrame">
+          <div id="scReader"></div>
+          <div class="sc-paused">
+            <div>Camera paused</div>
+            <button class="sc-btn y" onclick="scanResume()">▶ Resume scanning</button>
+          </div>
+          <div class="sc-cap" id="scCap">
+            <div class="sc-cap-k" id="scCapKey"></div>
+            <div class="sc-cap-t">Matched ✓ — now point at the item and click its picture</div>
+            <button class="sc-btn y" onclick="saCapture()">📷 Click item picture</button>
+            <button class="sc-btn sm" onclick="saSkipPhoto()">Skip for now — take it later</button>
+          </div>
+        </div>
+        <div class="sc-msg" id="scMsg"></div>
+        <div class="sc-perm" id="scPerm"></div>
+        <div class="sc-ctl">
+          <button class="sc-btn y" id="scSnapBtn" title="Take a photo of the sticker — it is decoded from the picture" onclick="scanSnap()">📸 Photo scan</button>
+          <button class="sc-btn" id="scSwitch" disabled onclick="scanSwitchCamera()">🔄 Camera</button>
+          <button class="sc-btn" id="scTorch" disabled onclick="scanToggleTorch()">🔦 Torch</button>
+        </div>
+        <input type="file" class="hidef" id="scSnap" accept="image/*" capture="environment" onchange="scanSnapPicked(this)">
+        <div id="scSnapHost" class="hidef"></div>
+        <div class="sc-man">
+          <input type="text" id="scKey" placeholder="Or type / paste the Unique Key…" onkeydown="if(event.key==='Enter'){event.preventDefault();scanManual();}">
+          <button class="sc-btn y" onclick="scanManual()">Add</button>
+        </div>
+        <input type="file" class="hidef" id="scCam" accept="image/*" capture="environment" onchange="scanPhotoPicked(this)">
+      </div>
+      <div class="sc-list" id="scList"></div>
+    </div>
+    <div class="sc-foot">
+      <div class="sc-hint" id="scHint">Scan → click the picture → next item. Items stay here until you press Save; ✕ removes one. Nothing is written until Save.</div>
+      <button class="sc-btn g" id="scSaveBtn" disabled onclick="scanSave()">💾 Save 0 ready</button>
+      <button class="sc-btn" id="scCloseBtn" onclick="scanClose()">Close</button>
+      <span id="scBuild" style="font-size:9.5px;color:#666;flex:1 1 100%;text-align:right"></span>
+    </div>
+  </div>
+</div>
+<!-- ============================================================
+  LOCK GATE — client side
+  Paste this WHOLE block into Index.html just before </body>.
+  Replace the placeholders:
+    Dispatch  first word of the dashboard name  (e.g. PO)
+    FMS  rest of the dashboard name        (e.g. Issue)
+    DF    2-letter badge                    (e.g. PI)
+
+  Everything is prefixed sg- and scoped under #sgGate, so it cannot
+  clash with the host app's CSS — or with an older lg- gate.
+  The overlay is DARK FROSTED GLASS. The header strip carrying the
+  dashboard name has a BLANK background — no dark bar.
+  The name dropdown is forced DARK on every browser and OS theme.
+============================================================= -->
+<style>
+/* font pinned — never inherit, or the card looks different on every project */
+#sgGate,#sgGate *{font-family:Arial,Helvetica,sans-serif !important;box-sizing:border-box}
+/* light scheme pinned — stops Chrome/Windows dark mode greying out the native select list */
+#sgGate{color-scheme:light}
+
+.sg-gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99990;padding:16px;
+  background:rgba(16,15,12,.52);
+  -webkit-backdrop-filter:blur(16px) saturate(110%);
+          backdrop-filter:blur(16px) saturate(110%)}
+@supports not ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){
+  .sg-gate{background:rgba(16,15,12,.68)}
+}
+.sg-gate.sg-off{display:none}
+
+.sg-card{background:#fff;border-radius:16px;width:410px;max-width:94vw;overflow:hidden;
+  box-shadow:0 28px 80px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.06);
+  animation:sgpop .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes sgpop{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+
+/* header — BLANK background, badge + dashboard name, closed by a hairline */
+.sg-top{background:transparent;padding:18px 24px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #F0EEE8}
+.sg-mark{width:32px;height:32px;border-radius:8px;background:#F5C800;color:#141414;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sg-logo{font-size:15.5px;font-weight:400;color:#141414;letter-spacing:-.3px}
+.sg-logo b{font-weight:700}
+.sg-ref{margin-left:auto;width:30px;height:30px;border-radius:7px;border:1px solid #ecebe7;background:#fafaf8;color:#5A5A5A;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+.sg-ref:hover{background:#fff7d6;color:#8A6A00;border-color:#F5C800}
+.sg-ref svg{width:15px;height:15px}
+.sg-ref.sg-spin svg{animation:sgsp .7s linear infinite}
+@keyframes sgsp{to{transform:rotate(360deg)}}
+
+.sg-body{padding:16px 24px 22px}
+.sg-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#8A6A00}
+.sg-h{font-size:22px;font-weight:700;color:#111;margin-top:5px;letter-spacing:-.4px}
+.sg-sub{font-size:12.5px;color:#4F4F4F;margin:5px 0 16px;line-height:1.45}
+.sg-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#8A6A00;margin:12px 0 6px}
+
+/* ── NAME DROPDOWN — ALWAYS DARK ─────────────────────────────
+   The closed control, the open native list and every option are
+   pinned to #141414 / 600. -webkit-text-fill-color is what stops
+   iOS/Safari and Chrome-on-Windows dark mode washing the text to
+   grey; without it the select renders faint on some machines and
+   the card looks broken even though the CSS "looks" right.        */
+.sg-sel-wrap{position:relative}
+.sg-sel{width:100%;height:44px;padding:0 36px 0 14px;border:1.5px solid #e2e0db;border-radius:10px;
+  background:#fff;font-size:13.5px;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;
+  color:#141414 !important;-webkit-text-fill-color:#141414;font-weight:600;color-scheme:light;opacity:1;
+  transition:border .15s,box-shadow .15s}
+.sg-sel option,.sg-sel optgroup{color:#141414 !important;background:#fff !important;font-weight:600}
+.sg-sel:focus{border-color:#F5C800;box-shadow:0 0 0 3px rgba(245,200,0,.18)}
+/* placeholder only — still dark enough to read, just lighter than a real name */
+.sg-sel.sg-ph{color:#5F5F5F !important;-webkit-text-fill-color:#5F5F5F;font-weight:500}
+.sg-sel option:disabled{color:#6B6B6B !important}
+.sg-caret{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:#4F4F4F;font-size:11px}
+
+.sg-pw-wrap{position:relative}
+.sg-pw{width:100%;height:44px;padding:0 44px 0 14px;border:1.5px solid #e2e0db;border-radius:10px;background:#fff;
+  font-size:13.5px;color:#141414 !important;-webkit-text-fill-color:#141414;font-weight:600;color-scheme:light;
+  outline:none;transition:border .15s,box-shadow .15s}
+.sg-pw::placeholder{color:#8A8A8A;-webkit-text-fill-color:#8A8A8A;font-weight:400}
+.sg-pw:focus{border-color:#F5C800;box-shadow:0 0 0 3px rgba(245,200,0,.18)}
+.sg-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:none;background:transparent;color:#5A5A5A;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.sg-eye:hover{color:#141414;background:#f5f4f0}
+.sg-eye svg{width:17px;height:17px}
+
+.sg-note{font-size:11.5px;color:#5A5A5A;margin-top:10px;line-height:1.5}
+.sg-note b{color:#8A6A00;font-weight:700;cursor:default}
+.sg-go{width:100%;height:46px;margin-top:16px;border:1.5px solid #F5C800;border-radius:10px;background:#F5C800;color:#141414;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.sg-go:hover:not(:disabled){background:#e6ba00}
+/* never opacity — it fades the label to nothing */
+.sg-go:disabled{cursor:not-allowed;background:#F1EEE4;border-color:#E6DFC8;color:#6E6959}
+.sg-err{font-size:11.5px;color:#dc2626;margin-top:9px;min-height:15px;line-height:1.4;text-align:center;font-weight:700}
+.sg-shake{animation:sgshake .4s}
+@keyframes sgshake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+</style>
+
+<div id="sgGate" class="sg-gate">
+  <div class="sg-card" id="sgCard">
+    <div class="sg-top">
+      <div class="sg-mark">DF</div>
+      <div class="sg-logo"><b>Dispatch</b> FMS</div>
+      <button class="sg-ref" id="sgRef" title="Refresh names" aria-label="Refresh names" onclick="sgLoadNames(true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+    <div class="sg-body">
+      <div class="sg-eyebrow">Secure Sign-In</div>
+      <div class="sg-h">Welcome back</div>
+      <div class="sg-sub">Select your name, then enter your password to open the dashboard.</div>
+
+      <div class="sg-lbl">Your Name</div>
+      <div class="sg-sel-wrap">
+        <select id="sgName" class="sg-sel sg-ph" onchange="sgChanged()">
+          <option value="" disabled selected>Loading names…</option>
+        </select>
+        <span class="sg-caret">▾</span>
+      </div>
+
+      <div class="sg-lbl">Password</div>
+      <div class="sg-pw-wrap">
+        <input type="password" id="sgPass" class="sg-pw" placeholder="Enter your password" autocomplete="current-password" oninput="sgChanged()" onkeydown="if(event.key==='Enter')sgUnlock()">
+        <button type="button" class="sg-eye" id="sgEye" title="Show password" aria-label="Show password" onclick="sgToggleEye()">
+          <svg id="sgEyeOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="sgEyeOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
+
+      <div class="sg-note">Forgot your password? <b>Contact the admin</b> and use the password given to you exactly as provided.</div>
+
+      <button class="sg-go" id="sgGo" disabled onclick="sgUnlock()">Unlock Dashboard →</button>
+      <div class="sg-err" id="sgErr"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- LOCK GATE ---------- */
+var sgBusy = false;
+
+/* An older lg-/plain gate left in Index.html shares the old ids, so
+   getElementById grabs it instead of this one and the page keeps the old
+   faded look. Remove any leftover on load. */
+function sgKillOldGates(){
+  ['lgGate','gate','loginGate'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && el.id !== 'sgGate') el.remove();
+  });
+  document.querySelectorAll('.lg-gate').forEach(function(el){
+    if (el.id !== 'sgGate') el.remove();
+  });
+}
+
+function sgLoadNames(fromBtn){
+  if (window.SA && SA.on) return;        // scanner-only tab has no gate
+  if (!window.google || !google.script) {  // hosted copy opened by hand, not from the dashboard
+    document.getElementById('sgName').innerHTML = '<option value="" disabled selected>Open the dashboard instead</option>';
+    document.getElementById('sgErr').textContent = 'This address only hosts the QR scanner. Open the Dispatch FMS dashboard and press 📷 Scan there.';
+    return;
+  }
+  var btn = document.getElementById('sgRef');
+  if (fromBtn) btn.classList.add('sg-spin');
+  var sel = document.getElementById('sgName');
+  google.script.run
+    .withSuccessHandler(function(names){
+      btn.classList.remove('sg-spin');
+      /* Read the selection HERE, not before the call: the list takes a moment to
+         arrive and the user may well have picked a name in the meantime. Reading
+         it beforehand wiped that choice every time. */
+      var keep = sel.value;
+      sel.innerHTML = '';
+      var ph = document.createElement('option');
+      ph.value=''; ph.disabled=true; ph.textContent='Select your name';
+      sel.appendChild(ph);
+      (names||[]).forEach(function(n){
+        var o = document.createElement('option');
+        o.value = n; o.textContent = n;   /* names only — nothing else in the dropdown */
+        sel.appendChild(o);
+      });
+      if (keep && names && names.indexOf(keep) > -1){ sel.value = keep; }
+      else { ph.selected = true; }
+      sgChanged();
+      if (!names || !names.length){
+        document.getElementById('sgErr').textContent = 'No names found in the user tab (A2:A).';
+      } else if (fromBtn){
+        document.getElementById('sgErr').textContent = '';
+      }
+    })
+    .withFailureHandler(function(e){
+      btn.classList.remove('sg-spin');
+      sel.innerHTML = '<option value="" disabled selected>Could not load names</option>';
+      document.getElementById('sgErr').textContent = String(e && e.message ? e.message : e);
+    })
+    .lockgateNames();
+}
+
+function sgChanged(){
+  var sel = document.getElementById('sgName');
+  sel.classList.toggle('sg-ph', !sel.value);
+  var ok = !!sel.value && !!document.getElementById('sgPass').value;
+  document.getElementById('sgGo').disabled = !ok || sgBusy;
+}
+
+function sgToggleEye(){
+  var inp = document.getElementById('sgPass');
+  var show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  document.getElementById('sgEyeOn').style.display  = show ? 'none' : '';
+  document.getElementById('sgEyeOff').style.display = show ? '' : 'none';
+  inp.focus();
+}
+
+function sgUnlock(){
+  if (sgBusy) return;
+  var name = document.getElementById('sgName').value;
+  var pass = document.getElementById('sgPass').value;
+  if (!name || !pass) return;
+  sgBusy = true;
+  var go = document.getElementById('sgGo');
+  go.disabled = true; go.textContent = 'Checking…';
+  document.getElementById('sgErr').textContent = '';
+  google.script.run
+    .withSuccessHandler(function(res){
+      sgBusy = false; go.textContent = 'Unlock Dashboard →';
+      if (res && res.ok){
+        document.getElementById('sgGate').classList.add('sg-off');
+        if (typeof LOCKGATE_onUnlock === 'function') LOCKGATE_onUnlock(res.name);
+      } else {
+        sgFail(res && res.msg ? res.msg : 'Sign-in failed. Try again.');
+      }
+    })
+    .withFailureHandler(function(e){
+      sgBusy = false; go.textContent = 'Unlock Dashboard →';
+      sgFail(String(e && e.message ? e.message : e));
+    })
+    .lockgateVerify(name, pass);
+}
+
+function sgFail(msg){
+  document.getElementById('sgErr').textContent = msg;
+  document.getElementById('sgPass').value = '';
+  sgChanged();
+  var c = document.getElementById('sgCard');
+  c.classList.remove('sg-shake'); void c.offsetWidth; c.classList.add('sg-shake');
+  document.getElementById('sgPass').focus();
+}
+
+/* show the gate again later, e.g. a "switch user" button */
+function sgShowGate(){
+  document.getElementById('sgPass').value = '';
+  document.getElementById('sgErr').textContent = '';
+  sgChanged();
+  document.getElementById('sgGate').classList.remove('sg-off');
+  sgLoadNames(false);
+}
+/* alias kept so older "change user" buttons don't break */
+function lgShowGate(){ sgShowGate(); }
+
+document.addEventListener('DOMContentLoaded', function(){
+  sgKillOldGates();
+  sgLoadNames(false);
+});
+</script>
+</body>
+</html>
